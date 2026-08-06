@@ -1,4 +1,5 @@
-﻿const db=window.tuguinhoDb;
+﻿const ASSET_BASE=window.TUGUINHO_ASSET_BASE||"../public/relogios";
+const db=window.tuguinhoDb;
 const $=id=>document.getElementById(id);
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const dateTime=value=>new Date(value).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});
@@ -126,7 +127,7 @@ function renderDemand(){
     const percent=total?Math.round(item.units/total*100):0;
     return `<article class="model-row ${first?"is-launch":""}">
       <span class="model-rank">${index+1}º</span>
-      <img class="model-thumb" src="../public/relogios/${item.sku}.svg" alt="Relógio ${item.sku}" loading="lazy">
+      <img class="model-thumb" src="${ASSET_BASE}/${item.sku}.svg" alt="Relógio ${item.sku}" loading="lazy">
       <div class="model-id"><b>${escapeHtml(item.sku)}</b><small>${percent}% da procura total</small></div>
       <div class="demand-visual"><div class="demand-bar"><i style="width:${item.units/maxUnits*100}%"></i></div></div>
       <div class="model-stat"><b>${item.units} un.</b><small>pré-selecionadas</small></div>
@@ -212,6 +213,7 @@ async function saveOrderStatus(id){
 }
 
 (async()=>{const {data:{session}}=await db.auth.getSession();await enterAdmin(session)})();
+
 
 
 
