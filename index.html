@@ -1,0 +1,128 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Monte sua caixa Tuguinho com 12 relógios escolhidos por você.">
+  <title>Tuguinho — Monte Sua Caixa</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="theme-color" content="#0d0d0f">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700,800,900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="brand-intro" id="brandIntro" aria-hidden="true"><div class="intro-mark"><img src="public/relogios/LOGO%20TUGUINHO%20CROP.svg" alt=""><span></span></div><p>MONTE SUA CAIXA</p></div>
+  <header class="topbar">
+    <a href="#inicio" class="brand"><img src="public/relogios/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><span>MONTE SUA CAIXA</span></a><nav class="desktop-nav" aria-label="Navegação principal"><a href="#packageReveal">Como funciona</a><a href="#montador">Monte sua caixa</a></nav>
+    <div class="order-pill"><span id="headerBoxes">0 caixas prontas</span><b id="headerUnits">0 peças</b></div>
+    <button class="soft-button" data-scroll="montador">Ir para o montador</button>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-copy">
+        <span class="eyebrow">PRÉ-VENDA EXCLUSIVA PARA LOJISTAS</span>
+        <h1>Monte uma caixa que <em>as crianças vão querer conhecer.</em></h1>
+        <p>Escolha 12 relógios, repita os favoritos da sua loja e receba um expositor Tuguinho pronto para o balcão.</p>
+        <div class="price-row"><b>R$ 39,99</b><span>por relógio<br><strong>R$ 479,88</strong> por caixa</span></div>
+        <button class="primary" data-scroll="montador">Montar minha primeira caixa <span>→</span></button>
+      </div>
+      <div class="hero-product">
+        <span class="spark spark-one">✦</span><span class="spark spark-two">✦</span>
+        <div class="hero-badge"><b>12</b><span>PEÇAS</span></div>
+        <img src="public/relogios/EMBALAGEM%20ABERTA.svg" alt="Embalagem aberta Tuguinho para 12 relógios">
+        <div class="hero-caption"><b>Embalagem expositora</b><span>Pronta para o balcão</span></div>
+      </div>
+    </section>
+
+    <section class="benefits">
+      <article><i>01</i><div><b>Escolha livre</b><span>Monte o mix ideal para o perfil da sua loja.</span></div></article>
+      <article><i>02</i><div><b>Repita os favoritos</b><span>Sem grade fechada por modelo ou cor.</span></div></article>
+      <article><i>03</i><div><b>Quantas caixas quiser</b><span>Complete 12 peças e comece a próxima.</span></div></article>
+    </section>
+
+    <section class="package-showcase" aria-label="Descubra a embalagem Tuguinho">
+      <div class="package-copy"><span class="eyebrow">DA ENTREGA AO BALCÃO</span><h2>Uma caixa.<br><em>Três momentos.</em></h2><p>Clique em uma etapa ou arraste o controle para ver como a embalagem chega protegida e vira uma exposição pronta para vender.</p><div class="reveal-step-copy"><b id="revealStep">01. Protegida para chegar</b><span id="revealDescription">A caixa viaja fechada e segura até a sua loja.</span></div></div>
+      <div class="package-reveal" id="packageReveal" style="--closed:1;--open:0;--unit:0">
+        <div class="reveal-tabs" role="group" aria-label="Etapas da embalagem">
+          <button type="button" class="reveal-tab active" data-stage="0" aria-pressed="true"><i>01</i><span><b>Fechada</b><small>Protegida</small></span></button>
+          <button type="button" class="reveal-tab" data-stage="50" aria-pressed="false"><i>02</i><span><b>Aberta</b><small>Expositora</small></span></button>
+          <button type="button" class="reveal-tab" data-stage="100" aria-pressed="false"><i>03</i><span><b>Individual</b><small>Cada relógio</small></span></button>
+        </div>
+        <div class="reveal-stage" aria-live="polite">
+          <img class="reveal-image reveal-closed" src="public/relogios/EMBALAGEM%20FECHADA.svg" alt="">
+          <img class="reveal-image reveal-open" src="public/relogios/EMBALAGEM%20ABERTA.svg" alt="">
+          <img class="reveal-image reveal-unit" src="public/relogios/EMBALAGME%20UNIDADE.svg" alt="">
+          <span class="reveal-badge" id="revealBadge">PROTEGIDA</span>
+        </div>
+        <div class="reveal-control">
+          <span class="drag-hint">← ARRASTE PARA DESCOBRIR →</span>
+          <input id="packageSlider" type="range" min="0" max="100" step="1" value="0" aria-label="Arraste para revelar as três etapas da embalagem">
+          <div class="reveal-scale" aria-hidden="true"><span>Fechada</span><span>Aberta</span><span>Individual</span></div>
+        </div>
+      </div>
+    </section>
+    <section class="builder" id="montador">
+      <div class="catalog-panel">
+        <div class="section-title"><span>01</span><div><h2>Escolha os relógios</h2><p>Adicione 12 peças. Você pode repetir o mesmo SKU.</p></div></div>
+        <div class="catalog-tools">
+          <label class="search"><span>⌕</span><input id="search" type="search" placeholder="Buscar por SKU" autocomplete="off"></label>
+          <span class="catalog-count"><b id="visibleCount">39</b> modelos</span>
+        </div>
+        <div class="product-grid" id="productGrid"></div>
+      </div>
+
+      <aside class="box-panel" id="boxPanel"><button class="mobile-box-close" id="closeMobileBox" aria-label="Fechar caixa">×</button>
+        <div class="box-title"><div><span>02</span><div><small>MONTANDO AGORA</small><h2>Caixa <b id="boxNumber">1</b></h2></div></div><strong id="boxCount">0<small>/12</small></strong></div>
+        <div class="segments" id="segments"></div>
+        <p class="progress-message" id="progressMessage">Sua caixa espera o primeiro Tuguinho.</p>
+        <div class="box-visual">
+          <div class="box-logo"><img src="public/relogios/LOGO%20TUGUINHO%20CROP.svg" alt=""><span>CAIXA MIX · 12 PEÇAS</span></div>
+          <div class="slots" id="slots"></div>
+          <footer>ESCOLHIDO POR VOCÊ</footer>
+        </div>
+        <div class="subtotal"><span>Subtotal desta caixa</span><b id="subtotal">R$ 0,00</b></div>
+        <button class="primary full" id="confirmBox" disabled>Faltam 12 para completar</button>
+        <button class="link-button" id="clearBox" hidden>Limpar caixa atual</button>
+        <div class="saved-boxes" id="savedBoxes" hidden><b>CAIXAS CONFIRMADAS</b><div id="savedBoxesList"></div></div>      </aside>
+      <button class="mobile-box-backdrop" id="mobileBoxBackdrop" aria-label="Fechar visualização da caixa" tabindex="-1"></button>
+    </section>
+
+    <section class="how">
+      <span class="eyebrow dark">SIMPLES E DO SEU JEITO</span><h2>Da escolha ao pré-pedido em três passos.</h2>
+      <div><article><b>1</b><h3>Escolha o mix</h3><p>Selecione os modelos e repita os favoritos da sua loja.</p></article><article><b>2</b><h3>Complete 12</h3><p>Veja cada relógio ocupar uma posição na embalagem.</p></article><article><b>3</b><h3>Envie ao representante</h3><p>Confirme seus dados e compartilhe o resumo pelo WhatsApp.</p></article></div>
+    </section>
+
+    <section class="checkout" id="checkout" hidden>
+      <div class="checkout-copy"><span class="eyebrow dark">FINALIZE O PRÉ-PEDIDO</span><h2>Só falta contar para quem vamos confirmar.</h2><p>Confira suas caixas e deixe os dados essenciais. O representante receberá tudo organizado.</p><div class="order-total"><span>Resumo atual</span><b id="grandTotal">0 caixas · 0 peças · R$ 0,00</b></div></div>
+      <form id="orderForm">
+        <label>Nome da loja<input id="storeName" required autocomplete="organization" placeholder="Ex.: Loja Alegria"></label>
+        <div><label>Nome do comprador<input id="buyerName" required autocomplete="name" placeholder="Quem está fazendo o pedido?"></label><label>Representante<input id="representative" required placeholder="Quem atende sua loja?"></label></div>
+        <label>Telefone / WhatsApp<input id="phone" required inputmode="tel" autocomplete="tel" placeholder="(11) 99999-9999"></label>
+        <label class="consent"><input type="checkbox" required><span>Aceito receber comunicações da Tuguinho sobre este pré-pedido e sua confirmação comercial.</span></label>
+        <button class="whatsapp" type="submit" disabled id="sendOrder">Enviar pré-pedido pelo WhatsApp <b>→</b></button>
+        <small>Disponibilidade, prazo e condições serão confirmados pela equipe comercial.</small>
+      </form>
+    </section>
+    <section class="success-card" id="successCard" hidden><img src="public/relogios/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><div><span>PRÉ-PEDIDO PREPARADO</span><h2>Seu mix está pronto para a confirmação.</h2><p id="successSummary"></p><button class="primary" id="newOrder">Montar um novo pedido</button></div><img class="success-package" src="public/relogios/EMBALAGEM%20FECHADA.svg" alt="Caixa Tuguinho pronta"></section>
+  </main>
+
+  <footer class="footer"><img src="public/relogios/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><p>Pré-venda para lojistas · você escolhe o mix</p><small>Valores e prazos serão confirmados pelo atendimento.</small></footer>
+
+  <div class="modal-backdrop" id="completeModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-x" id="modalClose" aria-label="Fechar">×</button><img class="modal-package" src="public/relogios/EMBALAGEM%20ABERTA.svg" alt="Caixa Tuguinho completa"><div class="success-icon">✓</div><span>CAIXA COMPLETA</span><h2 id="modalTitle">Uhu! Sua caixa está pronta!</h2><p>Você escolheu 12 Tuguinhos. Quer montar outra caixa ou finalizar o pré-pedido?</p><div class="modal-price"><span>Valor da caixa</span><b>R$ 479,88</b></div><button class="primary full" id="nextBox">Guardar e montar outra caixa</button><button class="secondary full" id="finishOrder">Finalizar meu pré-pedido</button><button class="link-button" id="adjustBox">Voltar e ajustar a seleção</button></div>
+  </div>
+
+  <button class="mobile-box-dock" id="mobileBoxDock" aria-label="Ver minha caixa"><span><b id="mobileBoxCount">0/12</b><small>Minha Caixa</small></span><strong id="mobileBoxTotal">R$ 0,00</strong><i>↑</i></button>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0/dist/umd/supabase.min.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
+

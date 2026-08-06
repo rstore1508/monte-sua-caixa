@@ -1,0 +1,99 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#351080">
+  <title>Admin · Tuguinho</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700,800,900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="login-shell" id="loginView">
+    <section class="login-card">
+      <div class="login-brand"><img src="../public/relogios/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><span>ÁREA RESTRITA</span></div>
+      <div class="lock-icon" aria-hidden="true">✦</div>
+      <p class="eyebrow">PAINEL COMERCIAL</p>
+      <h1>Bem-vindo de volta.</h1>
+      <p class="support">Entre com o e-mail administrativo autorizado para acompanhar os pré-pedidos.</p>
+      <form id="loginForm">
+        <label>E-mail administrativo<input id="loginEmail" type="email" autocomplete="username" required placeholder="seu@email.com"></label>
+        <label>Senha<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••••••"></label>
+        <p class="form-error" id="loginError" role="alert"></p>
+        <button type="submit" class="primary" id="loginButton">Entrar com segurança <span>→</span></button>
+      </form>
+      <small>O endereço desta página não concede acesso aos pedidos. A autorização é validada pelo banco.</small>
+    </section>
+  </main>
+
+  <div class="admin-app" id="adminView" hidden>
+    <aside class="sidebar">
+      <img src="../public/relogios/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho" class="side-logo">
+      <span class="side-label">PAINEL COMERCIAL</span>
+      <nav>
+        <a class="active" href="#pedidos"><i>▦</i> Pedidos</a>
+        <a href="#modelos"><i>◉</i> Modelos em alta</a>
+      </nav>
+      <div class="profile"><span id="profileInitial">R</span><div><b id="profileName">Rogério</b><small>Administrador</small></div></div>
+      <button class="logout" id="logoutButton">Sair do painel</button>
+    </aside>
+
+    <main class="dashboard" id="pedidos">
+      <header class="dash-header"><div><p class="eyebrow">VISÃO GERAL</p><h1>Pré-pedidos das lojas</h1><p>Acompanhe cada caixa enviada pelo montador Tuguinho.</p></div><button class="refresh" id="refreshButton">↻ Atualizar</button></header>
+      <section class="metrics" aria-label="Resumo de pedidos">
+        <article><span>Pedidos</span><b id="metricOrders">0</b><small>recebidos</small></article>
+        <article><span>Caixas</span><b id="metricBoxes">0</b><small>montadas</small></article>
+        <article><span>Relógios</span><b id="metricItems">0</b><small>selecionados</small></article>
+        <article class="metric-value"><span>Valor potencial</span><b id="metricValue">R$ 0,00</b><small>em produtos</small></article>
+      </section>
+      <section class="demand-panel" id="modelos">
+        <div class="demand-head">
+          <div>
+            <p class="eyebrow">INTELIGÊNCIA DE PRÉ-SAVE</p>
+            <h2>Quais modelos devem sair primeiro?</h2>
+            <p>Ranking calculado pelos relógios escolhidos nas caixas. Pedidos cancelados ficam fora da análise.</p>
+          </div>
+          <label class="launch-size">Primeira leva
+            <select id="launchSize">
+              <option value="6">6 modelos</option>
+              <option value="9" selected>9 modelos</option>
+              <option value="12">12 modelos</option>
+              <option value="15">15 modelos</option>
+            </select>
+          </label>
+        </div>
+        <div class="demand-summary">
+          <article><span>Modelo líder</span><b id="topSku">—</b><small id="topSkuUnits">Sem escolhas ainda</small></article>
+          <article><span>Modelos com demanda</span><b id="activeSkus">0</b><small>dos 39 disponíveis</small></article>
+          <article><span>Primeira leva sugerida</span><b id="launchUnits">0 un.</b><small id="launchShare">0% da procura</small></article>
+        </div>
+        <div class="launch-callout" id="launchCallout">
+          <span class="callout-icon">★</span>
+          <div><b>A recomendação aparecerá com os primeiros pré-pedidos.</b><p>Quanto mais lojas montarem suas caixas, mais segura fica a ordem de fabricação.</p></div>
+        </div>
+        <div class="model-ranking" id="modelRanking"></div>
+        <p class="ranking-note">A ordem é uma recomendação comercial baseada no volume do pré-save. Ela não inicia fabricação automaticamente.</p>
+      </section>
+      <section class="orders-panel">
+        <div class="panel-head"><div><h2>Pedidos recebidos</h2><span id="resultsCount">0 resultados</span></div><div class="filters"><label class="search"><span>⌕</span><input id="orderSearch" type="search" placeholder="Loja, comprador ou telefone"></label><select id="statusFilter" aria-label="Filtrar por status"><option value="todos">Todos os status</option><option value="novo">Novos</option><option value="em_contato">Em contato</option><option value="confirmado">Confirmados</option><option value="cancelado">Cancelados</option></select></div></div>
+        <div class="loading" id="loadingState">Carregando pedidos…</div>
+        <div class="empty" id="emptyState" hidden><span>☆</span><h3>Nenhum pedido por aqui.</h3><p>Os pré-pedidos enviados pelo site aparecerão automaticamente nesta área.</p></div>
+        <div class="orders-list" id="ordersList"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog class="order-dialog" id="orderDialog">
+    <button class="dialog-close" id="dialogClose" aria-label="Fechar">×</button>
+    <div id="dialogContent"></div>
+  </dialog>
+  <div class="toast" id="adminToast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0/dist/umd/supabase.min.js"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
+
