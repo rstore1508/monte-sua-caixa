@@ -4,7 +4,7 @@ const PRICE=39.99,BOX_SIZE=12,STORAGE_KEY="tuguinho-monte-sua-caixa-v3";
 let state={current:[],boxes:[]};
 let zoomLevel=1;
 let toastTimer;
-let shareBusy=false;
+let imageBusy=false;
 const $=id=>document.getElementById(id);
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const asset=sku=>`${ASSET_BASE}/${encodeURIComponent(sku)}.svg`;
@@ -115,31 +115,31 @@ function changeZoom(delta){zoomLevel=Math.min(2.5,Math.max(1,zoomLevel+delta));a
 function openMobileDrawer(){$("boxPanel").classList.add("mobile-open");$("mobileBoxBackdrop").classList.add("open");document.body.classList.add("drawer-open")}
 function closeMobileDrawer(){$("boxPanel").classList.remove("mobile-open");$("mobileBoxBackdrop").classList.remove("open");document.body.classList.remove("drawer-open")}
 
+function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob)})}
+async function inlineImage(src){const response=await fetch(src,{mode:"cors",cache:"force-cache"});if(!response.ok)throw new Error(`Falha ao carregar imagem: ${src}`);return blobToDataUrl(await response.blob())}
 async function makeOrderImage(){
   if(!window.html2canvas)throw new Error("Gerador de imagem indisponível");
   await document.fonts?.ready;
   const card=$("printCard");
-  const images=[...card.querySelectorAll("img")];
-  await Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve})));
-  const canvas=await window.html2canvas(card,{scale:Math.min(2,window.devicePixelRatio||2),backgroundColor:"#ffffff",useCORS:true,logging:false});
-  return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Não foi possível criar a imagem")),"image/png",.96));
+  const clone=card.cloneNode(true);clone.removeAttribute("id");clone.style.cssText=`position:fixed;left:-10000px;top:0;width:${card.getBoundingClientRect().width}px;z-index:-1;background:#fff`;
+  document.body.appendChild(clone);
+  try{
+    const images=[...clone.querySelectorAll("img")];
+    await Promise.all(images.map(async img=>{img.src=await inlineImage(img.src);if(img.decode)await img.decode().catch(()=>{});}));
+    const canvas=await window.html2canvas(clone,{scale:Math.min(2,window.devicePixelRatio||2),backgroundColor:"#ffffff",useCORS:false,logging:false});
+    return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Não foi possível criar a imagem")),"image/png",.96));
+  }finally{clone.remove()}
 }
 function downloadOrderImage(blob){
   const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download=`pedido-tuguinho-${new Date().toISOString().slice(0,10)}.png`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);
 }
-async function shareOrderImage(forceDownload=false){
-  if(shareBusy)return;shareBusy=true;
-  const button=forceDownload?$("downloadImage"):$("shareImage");const original=button.innerHTML;button.disabled=true;button.textContent="Preparando imagem…";
-  try{
-    const blob=await makeOrderImage();
-    if(forceDownload){downloadOrderImage(blob);toast("Imagem salva. Envie ao seu representante ✓");return}
-    const file=new File([blob],"pedido-tuguinho.png",{type:"image/png"});
-    if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:"Pedido Tuguinho",text:"Olá! Montei minha seleção Tuguinho. Segue a imagem do pedido:",files:[file]});toast("Imagem compartilhada ✓")}
-    else{downloadOrderImage(blob);toast("Imagem baixada. Agora envie no WhatsApp.")}
-  }catch(error){if(error?.name!=="AbortError"){console.error("Falha ao criar a imagem",error);toast("Não foi possível criar a imagem. Tente novamente.")}}
-  finally{shareBusy=false;button.disabled=false;button.innerHTML=original}
+async function saveOrderImage(){
+  if(imageBusy)return;imageBusy=true;
+  const button=$("downloadImage");const original=button.innerHTML;button.disabled=true;button.textContent="Carregando fotos…";
+  try{const blob=await makeOrderImage();downloadOrderImage(blob);toast("Foto do pedido baixada ✓")}
+  catch(error){console.error("Falha ao criar a imagem",error);toast("Não foi possível carregar as fotos. Tente novamente.")}
+  finally{imageBusy=false;button.disabled=false;button.innerHTML=original}
 }
-
 function copySummary(){
   const text=orderText();
   if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text).then(()=>toast("Resumo copiado ✓")).catch(()=>fallbackCopy(text))}else fallbackCopy(text);
@@ -171,7 +171,7 @@ $("nextBox").onclick=()=>confirmCurrent(true);$("finishOrder").onclick=()=>confi
 $("completeModal").onclick=event=>{if(event.target===$("completeModal"))closeModal()};
 $("mobileBoxDock").onclick=openMobileDrawer;$("closeMobileBox").onclick=closeMobileDrawer;$("mobileBoxBackdrop").onclick=closeMobileDrawer;
 $("zoomClose").onclick=closeProductZoom;$("zoomOut").onclick=()=>changeZoom(-.25);$("zoomIn").onclick=()=>changeZoom(.25);$("productZoom").onclick=event=>{if(event.target===$("productZoom"))closeProductZoom()};
-$("shareImage").onclick=()=>shareOrderImage(false);$("downloadImage").onclick=()=>shareOrderImage(true);
+$("downloadImage").onclick=saveOrderImage;
 $("newOrder").onclick=()=>{if(confirm("Começar uma nova seleção?")){state={current:[],boxes:[]};save();$("printOrder").hidden=true;render();$("montador").scrollIntoView({behavior:"smooth"})}};
 window.addEventListener("scroll",()=>document.querySelector(".topbar")?.classList.toggle("scrolled",scrollY>24),{passive:true});
 document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(!$("completeModal").hidden)closeModal();if(!$("productZoom").hidden)closeProductZoom();closeMobileDrawer()}});

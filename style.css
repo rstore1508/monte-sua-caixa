@@ -70,8 +70,8 @@ body,button,input{font-family:"Satoshi","Segoe UI",Arial,sans-serif}
 
 /* Compartilhamento simples: o site cria a imagem pronta para o representante. */
 #printCard{background:#fff}
-.print-actions #shareImage{width:min(620px,100%);min-height:58px;margin:0 auto;flex:1 1 100%;font-size:13px}
-.print-actions #shareImage b{font-size:11px;letter-spacing:.02em}
-.print-actions #shareImage:disabled,.print-actions #downloadImage:disabled{opacity:.65;cursor:wait;transform:none}
+.print-actions #downloadImage{width:min(620px,100%);min-height:58px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex:1 1 100%;font-size:13px}
+.print-actions #downloadImage b{font-size:20px}
+.print-actions #downloadImage:disabled{opacity:.65;cursor:wait;transform:none}
 #printOrder .print-heading p{max-width:610px}
-@media(max-width:820px){#printOrder{margin-top:62px}.print-heading{text-align:left;padding:0 6px}.print-heading h2{font-size:clamp(2.45rem,12vw,4rem)}.print-heading p{font-size:14px;line-height:1.55}.print-actions #shareImage{min-height:64px;font-size:14px}.print-actions #downloadImage{min-height:52px}}
+@media(max-width:820px){#printOrder{margin-top:62px}.print-heading{text-align:left;padding:0 6px}.print-heading h2{font-size:clamp(2.45rem,12vw,4rem)}.print-heading p{font-size:14px;line-height:1.55}.print-actions #downloadImage{min-height:64px;font-size:14px}}
