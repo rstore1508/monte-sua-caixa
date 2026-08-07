@@ -120,9 +120,9 @@
       <article class="print-card" id="printCard">
         <header><img crossorigin="anonymous" src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><div><span>SELEÇÃO DO PRÉ-SAVE</span><b id="printDate"></b></div></header>
         <div class="print-boxes" id="printBoxes"></div>
-        <footer><div><span>TOTAL DA SELEÇÃO</span><b id="printTotal"></b></div><strong>Imagem pronta para enviar</strong></footer>
+        <footer><div><span>TOTAL DA SELEÇÃO</span><b id="printTotal"></b></div><strong>Foto pronta para salvar</strong></footer>
       </article>
-      <div class="print-actions"><button class="primary download-order" id="downloadImage"><span>Baixar foto do pedido</span><b>↓</b></button><button class="link-button" id="newOrder">Montar um novo pedido</button></div>
+      <div class="print-actions"><button class="primary download-order" id="downloadImage"><span>Gerar foto do pedido</span><b>→</b></button><button class="link-button" id="newOrder">Montar um novo pedido</button></div>
       <p class="save-status" id="saveStatus" role="status">Registrando os modelos mais escolhidos…</p>
     </section>  </main>
 
@@ -134,6 +134,17 @@
       <span>TOQUE EM + PARA VER OS DETALHES</span><h2 id="zoomTitle">Relógio Tuguinho</h2>
       <div class="zoom-stage"><img id="zoomImage" alt=""></div>
       <div class="zoom-controls"><button id="zoomOut" aria-label="Diminuir zoom">-</button><b id="zoomValue">100%</b><button id="zoomIn" aria-label="Aumentar zoom">+</button></div>
+    </div>
+  </div>
+  <div class="image-modal order-image-modal" id="orderImageModal" hidden>
+    <div class="order-image-dialog" role="dialog" aria-modal="true" aria-labelledby="orderImageTitle">
+      <button class="modal-x" id="orderImageClose" aria-label="Fechar foto">×</button>
+      <span>FOTO PRONTA</span><h2 id="orderImageTitle">Salve no seu celular</h2>
+      <p id="deviceSaveHint">Toque em salvar e escolha onde guardar a foto.</p>
+      <div class="order-image-stage"><img id="orderImagePreview" alt="Foto pronta do pedido Tuguinho"></div>
+      <button class="primary full save-phone" id="savePreparedImage">Salvar no celular <b>↓</b></button>
+      <button class="secondary full" id="openPreparedImage">Abrir foto em tela cheia</button>
+      <small>Se preferir, pressione a foto por alguns segundos e escolha “Salvar imagem”.</small>
     </div>
   </div>
   <div class="modal-backdrop" id="completeModal" hidden>
