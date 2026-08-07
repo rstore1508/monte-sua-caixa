@@ -162,30 +162,17 @@ async function inlineImage(src,square=false){
     return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Não foi possível criar a imagem")),"image/png",.96));
   }finally{clone.remove()}
 }
-function downloadOrderImage(blob){
-  const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download=`pedido-tuguinho-${new Date().toISOString().slice(0,10)}.png`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);
-}
 async function saveOrderImage(){
   if(imageBusy)return;imageBusy=true;
   const button=$("downloadImage"),original=button.innerHTML;button.disabled=true;button.textContent="Montando a foto…";
   try{
     orderImageBlob=await makeOrderImage();if(orderImageUrl)URL.revokeObjectURL(orderImageUrl);orderImageUrl=URL.createObjectURL(orderImageBlob);$("orderImagePreview").src=orderImageUrl;
-    const agent=navigator.userAgent;$("deviceSaveHint").textContent=/iPhone|iPad|iPod/i.test(agent)?"Toque em Salvar pedido e escolha Salvar Imagem no iPhone.":/Android/i.test(agent)?"Toque em Salvar pedido. A imagem irá para Downloads.":"Toque em Salvar pedido para baixar a imagem.";
+    $("deviceSaveHint").textContent="Tire um print desta tela e envie ao seu representante.";
     $("orderImageModal").hidden=false;document.body.style.overflow="hidden";toast("Foto pronta com todos os relógios ✓");
   }catch(error){console.error("Falha ao criar a imagem",error);toast("Não foi possível carregar as fotos. Tente novamente.")}
   finally{imageBusy=false;button.disabled=false;button.innerHTML=original}
 }
 function closeOrderImage(){$("orderImageModal").hidden=true;document.body.style.overflow=""}
-async function savePreparedImage(){
-  if(!orderImageBlob)return;
-  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent),file=new File([orderImageBlob],"pedido-tuguinho.png",{type:"image/png"});
-  try{
-    if(isIOS&&navigator.share&&navigator.canShare?.({files:[file]}))await navigator.share({title:"Pedido Tuguinho",files:[file]});
-    else{downloadOrderImage(orderImageBlob);toast("Pedido salvo em Downloads ✓")}
-  }catch(error){if(error?.name!=="AbortError"){downloadOrderImage(orderImageBlob);toast("Pedido baixado ✓")}}
-}
-
-function openPreparedImage(){if(orderImageUrl)window.open(orderImageUrl,"_blank","noopener")}
 function copySummary(){
   const text=orderText();
   if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text).then(()=>toast("Resumo copiado ✓")).catch(()=>fallbackCopy(text))}else fallbackCopy(text);
@@ -218,7 +205,7 @@ $("nextBox").onclick=()=>confirmCurrent(true);$("finishOrder").onclick=()=>confi
 $("completeModal").onclick=event=>{if(event.target===$("completeModal"))closeModal()};
 $("mobileBoxDock").onclick=()=>state.current.length===BOX_SIZE?openCompleteModal():openMobileDrawer();$("closeMobileBox").onclick=closeMobileDrawer;$("mobileBoxBackdrop").onclick=closeMobileDrawer;
 $("zoomClose").onclick=closeProductZoom;$("zoomOut").onclick=()=>changeZoom(-.25);$("zoomIn").onclick=()=>changeZoom(.25);$("productZoom").onclick=event=>{if(event.target===$("productZoom"))closeProductZoom()};
-$("downloadImage").onclick=saveOrderImage;$("savePreparedImage").onclick=savePreparedImage;$("openPreparedImage").onclick=openPreparedImage;$("orderImageClose").onclick=closeOrderImage;$("orderImageModal").onclick=event=>{if(event.target===$("orderImageModal"))closeOrderImage()};
+$("downloadImage").onclick=saveOrderImage;$("orderImageClose").onclick=closeOrderImage;$("orderImageModal").onclick=event=>{if(event.target===$("orderImageModal"))closeOrderImage()};
 $("newOrder").onclick=()=>{if(confirm("Começar uma nova seleção?")){state={current:[],boxes:[]};save();$("printOrder").hidden=true;render();$("montador").scrollIntoView({behavior:"smooth"})}};
 window.addEventListener("scroll",()=>document.querySelector(".topbar")?.classList.toggle("scrolled",scrollY>24),{passive:true});
 document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(!$("completeModal").hidden)closeModal();if(!$("productZoom").hidden)closeProductZoom();if(!$("orderImageModal").hidden)closeOrderImage();closeMobileDrawer()}});
