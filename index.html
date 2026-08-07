@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -56,7 +56,7 @@
         <div class="segments" id="segments"></div>
         <p class="progress-message" id="progressMessage">Sua caixa espera o primeiro Tuguinho.</p>
         <div class="box-visual">
-          <div class="box-logo"><img src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt=""><span>CAIXA MIX · 12 PEÇAS</span></div>
+          <div class="box-logo"><img src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt=""><span>CAIXA MIX — 12 PEÇAS</span></div>
           <div class="slots" id="slots"></div>
           <footer>ESCOLHIDO POR VOCÊ</footer>
         </div>
@@ -78,7 +78,7 @@
         <div class="story-step" style="--step:0">
           <article class="story-card story-closed">
             <div class="story-number">01</div>
-            <div class="story-copy"><span>CHEGA ASSIM</span><h3>Fechada e protegida.</h3><p>Segura no transporte até chegar à sua loja.</p></div>
+            <div class="story-copy"><span>CHEGA ASSIM</span><h3>Fechada e protegida.</h3><p>Segura no transporte até chegar — sua loja.</p></div>
             <div class="story-visual"><img src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/EMBALAGEM%20FECHADA.svg" alt="Embalagem Tuguinho fechada"></div>
           </article>
         </div>
@@ -114,35 +114,36 @@
     <section class="print-section" id="printOrder" hidden>
       <div class="print-heading">
         <span class="eyebrow dark">PEDIDO PRONTO</span>
-        <h2>Agora é só tirar um print.</h2>
-        <p>Envie esta imagem ao seu representante Tuguinho. Não pedimos nenhum dado pessoal.</p>
+        <h2>Seu pedido virou uma imagem.</h2>
+        <p>Toque no botão abaixo e envie a imagem pronta ao seu representante.</p>
       </div>
       <article class="print-card" id="printCard">
-        <header><img src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><div><span>SELEÇÃO DO PRÉ-SAVE</span><b id="printDate"></b></div></header>
+        <header><img crossorigin="anonymous" src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><div><span>SELEÇÃO DO PRÉ-SAVE</span><b id="printDate"></b></div></header>
         <div class="print-boxes" id="printBoxes"></div>
-        <footer><div><span>TOTAL DA SELEÇÃO</span><b id="printTotal"></b></div><strong>Envie este print ao seu representante</strong></footer>
+        <footer><div><span>TOTAL DA SELEÇÃO</span><b id="printTotal"></b></div><strong>Imagem pronta para enviar</strong></footer>
       </article>
-      <div class="print-actions"><button class="primary" id="printButton">Abrir modo de impressão</button><button class="secondary" id="copyOrder">Copiar resumo</button><button class="link-button" id="newOrder">Montar um novo pedido</button></div>
+      <div class="print-actions"><button class="whatsapp" id="shareImage"><span>Enviar imagem do pedido</span><b>WhatsApp →</b></button><button class="secondary" id="downloadImage">Baixar imagem</button><button class="link-button" id="newOrder">Montar um novo pedido</button></div>
       <p class="save-status" id="saveStatus" role="status">Registrando os modelos mais escolhidos…</p>
     </section>  </main>
 
-  <footer class="footer"><img src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><p>Pré-venda para lojistas · você escolhe o mix</p><small>Valores e prazos serão confirmados pelo atendimento.</small></footer>
+  <footer class="footer"><img src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><p>Pré-venda para lojistas — você escolhe o mix</p><small>Valores e prazos serão confirmados pelo atendimento.</small></footer>
 
   <div class="image-modal" id="productZoom" hidden>
     <div class="zoom-dialog" role="dialog" aria-modal="true" aria-labelledby="zoomTitle">
       <button class="modal-x" id="zoomClose" aria-label="Fechar imagem">×</button>
       <span>TOQUE EM + PARA VER OS DETALHES</span><h2 id="zoomTitle">Relógio Tuguinho</h2>
       <div class="zoom-stage"><img id="zoomImage" alt=""></div>
-      <div class="zoom-controls"><button id="zoomOut" aria-label="Diminuir zoom">−</button><b id="zoomValue">100%</b><button id="zoomIn" aria-label="Aumentar zoom">+</button></div>
+      <div class="zoom-controls"><button id="zoomOut" aria-label="Diminuir zoom">-</button><b id="zoomValue">100%</b><button id="zoomIn" aria-label="Aumentar zoom">+</button></div>
     </div>
   </div>
   <div class="modal-backdrop" id="completeModal" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-x" id="modalClose" aria-label="Fechar">×</button><img class="modal-package" src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/EMBALAGEM%20ABERTA.svg" alt="Caixa Tuguinho completa"><div class="success-icon">✓</div><span>CAIXA COMPLETA</span><h2 id="modalTitle">Uhu! Sua caixa está pronta!</h2><p>Você escolheu 12 Tuguinhos. Quer montar outra caixa ou finalizar o pré-pedido?</p><div class="modal-price"><span>Valor da caixa</span><b>R$ 479,88</b></div><button class="primary full" id="nextBox">Guardar e montar outra caixa</button><button class="secondary full" id="finishOrder">Ver pedido pronto para print</button><button class="link-button" id="adjustBox">Voltar e ajustar a seleção</button></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-x" id="modalClose" aria-label="Fechar">×</button><img class="modal-package" src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/EMBALAGEM%20ABERTA.svg" alt="Caixa Tuguinho completa"><div class="success-icon">✓</div><span>CAIXA COMPLETA</span><h2 id="modalTitle">Uhu! Sua caixa está pronta!</h2><p>Você escolheu 12 Tuguinhos. Quer montar outra caixa ou finalizar?</p><div class="modal-price"><span>Valor da caixa</span><b>R$ 479,88</b></div><button class="primary full" id="finishOrder">Finalizar e criar a imagem</button><button class="secondary full" id="nextBox">Montar outra caixinha</button><button class="link-button" id="adjustBox">Voltar e ajustar</button></div>
   </div>
 
   <button class="mobile-box-dock" id="mobileBoxDock" aria-label="Ver minha caixa"><span><b id="mobileBoxCount">0/12</b><small>Ver caixinha</small></span><strong id="mobileBoxTotal">R$ 0,00</strong><i>↑</i></button>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="supabase-config.js"></script>
   <script src="script.js"></script>
 </body>

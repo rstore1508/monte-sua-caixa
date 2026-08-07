@@ -1,9 +1,10 @@
-﻿const ASSET_BASE=window.TUGUINHO_ASSET_BASE||"public/relogios";
+const ASSET_BASE=window.TUGUINHO_ASSET_BASE||"public/relogios";
 const SKUS=["TG30615","TG30616","TG30617","TG30618","TG30619","TG30620","TG30622","TG30623","TG30624","TG30625","TG30626","TG30627","TG30628","TG30629","TG30630","TG30631","TG30632","TG30633","TG30634","TG30635","TG30636","TG30637","TG30638","TG30639","TG30640","TG30641","TG30642","TG30643","TG30644","TG30645","TG30646","TG30647","TG30648","TG30649","TG30650","TG30651","TG30652","TG30653","TG30654"];
 const PRICE=39.99,BOX_SIZE=12,STORAGE_KEY="tuguinho-monte-sua-caixa-v3";
 let state={current:[],boxes:[]};
 let zoomLevel=1;
 let toastTimer;
+let shareBusy=false;
 const $=id=>document.getElementById(id);
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const asset=sku=>`${ASSET_BASE}/${encodeURIComponent(sku)}.svg`;
@@ -92,7 +93,7 @@ function renderPrintCard(){
   $("printDate").textContent=new Date().toLocaleDateString("pt-BR");
   $("printBoxes").innerHTML=state.boxes.map((box,index)=>{
     const counts=countBox(box);
-    return `<section class="print-box"><header><b>CAIXINHA ${index+1}</b><span>12 RELÓGIOS</span></header><div class="print-items">${Object.entries(counts).map(([sku,count])=>`<article><img src="${asset(sku)}" alt="${sku}"><div><b>${sku}</b><span>${count} unidade${count===1?"":"s"}</span></div></article>`).join("")}</div></section>`;
+    return `<section class="print-box"><header><b>CAIXINHA ${index+1}</b><span>12 RELÓGIOS</span></header><div class="print-items">${Object.entries(counts).map(([sku,count])=>`<article><img crossorigin="anonymous" src="${asset(sku)}" alt="${sku}"><div><b>${sku}</b><span>${count} unidade${count===1?"":"s"}</span></div></article>`).join("")}</div></section>`;
   }).join("");
   $("printTotal").textContent=`${state.boxes.length} caixinha${state.boxes.length===1?"":"s"} · ${state.boxes.length*12} relógios · ${money(state.boxes.length*12*PRICE)}`;
 }
@@ -103,8 +104,8 @@ async function saveAnonymousSelection(){
 }
 async function finalizeSelection(){
   renderPrintCard();$("printOrder").hidden=false;$("saveStatus").textContent="Registrando os modelos mais escolhidos…";$("printOrder").scrollIntoView({behavior:"smooth"});
-  try{await saveAnonymousSelection();$("saveStatus").textContent="✓ Seleção registrada. Nenhum dado pessoal foi enviado.";toast("Pedido pronto para o print ✓")}
-  catch(error){console.error("Falha ao salvar seleção",error);$("saveStatus").textContent="Seu pedido está pronto para o print. A contagem online não pôde ser atualizada.";toast("Pedido pronto. A contagem online falhou.")}
+  try{await saveAnonymousSelection();$("saveStatus").textContent="✓ Seleção registrada. Agora envie a imagem ao seu representante.";toast("Imagem do pedido pronta ✓")}
+  catch(error){console.error("Falha ao salvar seleção",error);$("saveStatus").textContent="A imagem está pronta. A contagem online não pôde ser atualizada.";toast("Imagem pronta. A contagem online falhou.")}
 }
 
 function openProductZoom(sku){zoomLevel=1;$("zoomTitle").textContent=sku;$("zoomImage").src=asset(sku);$("zoomImage").alt=`Relógio infantil ${sku}`;applyZoom();$("productZoom").hidden=false;document.body.style.overflow="hidden"}
@@ -113,6 +114,31 @@ function applyZoom(){$("zoomImage").style.transform=`scale(${zoomLevel})`;$("zoo
 function changeZoom(delta){zoomLevel=Math.min(2.5,Math.max(1,zoomLevel+delta));applyZoom()}
 function openMobileDrawer(){$("boxPanel").classList.add("mobile-open");$("mobileBoxBackdrop").classList.add("open");document.body.classList.add("drawer-open")}
 function closeMobileDrawer(){$("boxPanel").classList.remove("mobile-open");$("mobileBoxBackdrop").classList.remove("open");document.body.classList.remove("drawer-open")}
+
+async function makeOrderImage(){
+  if(!window.html2canvas)throw new Error("Gerador de imagem indisponível");
+  await document.fonts?.ready;
+  const card=$("printCard");
+  const images=[...card.querySelectorAll("img")];
+  await Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve})));
+  const canvas=await window.html2canvas(card,{scale:Math.min(2,window.devicePixelRatio||2),backgroundColor:"#ffffff",useCORS:true,logging:false});
+  return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Não foi possível criar a imagem")),"image/png",.96));
+}
+function downloadOrderImage(blob){
+  const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download=`pedido-tuguinho-${new Date().toISOString().slice(0,10)}.png`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);
+}
+async function shareOrderImage(forceDownload=false){
+  if(shareBusy)return;shareBusy=true;
+  const button=forceDownload?$("downloadImage"):$("shareImage");const original=button.innerHTML;button.disabled=true;button.textContent="Preparando imagem…";
+  try{
+    const blob=await makeOrderImage();
+    if(forceDownload){downloadOrderImage(blob);toast("Imagem salva. Envie ao seu representante ✓");return}
+    const file=new File([blob],"pedido-tuguinho.png",{type:"image/png"});
+    if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:"Pedido Tuguinho",text:"Olá! Montei minha seleção Tuguinho. Segue a imagem do pedido:",files:[file]});toast("Imagem compartilhada ✓")}
+    else{downloadOrderImage(blob);toast("Imagem baixada. Agora envie no WhatsApp.")}
+  }catch(error){if(error?.name!=="AbortError"){console.error("Falha ao criar a imagem",error);toast("Não foi possível criar a imagem. Tente novamente.")}}
+  finally{shareBusy=false;button.disabled=false;button.innerHTML=original}
+}
 
 function copySummary(){
   const text=orderText();
@@ -145,7 +171,7 @@ $("nextBox").onclick=()=>confirmCurrent(true);$("finishOrder").onclick=()=>confi
 $("completeModal").onclick=event=>{if(event.target===$("completeModal"))closeModal()};
 $("mobileBoxDock").onclick=openMobileDrawer;$("closeMobileBox").onclick=closeMobileDrawer;$("mobileBoxBackdrop").onclick=closeMobileDrawer;
 $("zoomClose").onclick=closeProductZoom;$("zoomOut").onclick=()=>changeZoom(-.25);$("zoomIn").onclick=()=>changeZoom(.25);$("productZoom").onclick=event=>{if(event.target===$("productZoom"))closeProductZoom()};
-$("printButton").onclick=()=>window.print();$("copyOrder").onclick=copySummary;
+$("shareImage").onclick=()=>shareOrderImage(false);$("downloadImage").onclick=()=>shareOrderImage(true);
 $("newOrder").onclick=()=>{if(confirm("Começar uma nova seleção?")){state={current:[],boxes:[]};save();$("printOrder").hidden=true;render();$("montador").scrollIntoView({behavior:"smooth"})}};
 window.addEventListener("scroll",()=>document.querySelector(".topbar")?.classList.toggle("scrolled",scrollY>24),{passive:true});
 document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(!$("completeModal").hidden)closeModal();if(!$("productZoom").hidden)closeProductZoom();closeMobileDrawer()}});
