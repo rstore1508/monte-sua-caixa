@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#5622c6">
+  <title>Pedido Tuguinho</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,800,900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="pedido.css">
+</head>
+<body>
+  <main class="order-page">
+    <header class="order-intro">
+      <img src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho">
+      <div><span>PEDIDO PRONTO</span><h1>Tire um print desta página.</h1><p>Depois, envie a imagem ao seu representante.</p></div>
+    </header>
+
+    <section class="order-sheet" id="orderSheet" aria-label="Resumo do pedido">
+      <header class="sheet-header">
+        <img src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho">
+        <div><span>SELEÇÃO DO PRÉ-SAVE</span><b id="orderDate"></b></div>
+      </header>
+      <div class="order-boxes" id="orderBoxes"></div>
+      <footer class="sheet-total"><div><span>TOTAL DO PEDIDO</span><b id="orderTotal"></b></div><strong>Envie este print ao representante</strong></footer>
+    </section>
+
+    <div class="page-actions">
+      <a href="index.html#montador">← Voltar e corrigir o pedido</a>
+    </div>
+  </main>
+  <script src="supabase-config.js"></script>
+  <script src="pedido.js"></script>
+</body>
+</html>

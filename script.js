@@ -120,9 +120,9 @@ async function saveAnonymousSelection(){
   if(error)throw error;
 }
 async function finalizeSelection(){
-  renderPrintCard();$("printOrder").hidden=false;$("saveStatus").textContent="Registrando sua seleção…";toast("Preparando seu pedido…");
-  saveAnonymousSelection().then(()=>{$("saveStatus").textContent="✓ Seleção registrada."}).catch(error=>{console.error("Falha ao salvar seleção",error);$("saveStatus").textContent="A foto está pronta, mas a contagem online não foi atualizada."});
-  requestAnimationFrame(()=>saveOrderImage());
+  toast("Abrindo o pedido…");
+  try{await saveAnonymousSelection()}catch(error){console.error("Falha ao salvar seleção",error)}
+  location.href="pedido.html";
 }
 
 function openProductZoom(sku){zoomLevel=1;$("zoomTitle").textContent=sku;$("zoomImage").src=asset(sku);$("zoomImage").alt=`Relógio infantil ${sku}`;applyZoom();$("productZoom").hidden=false;document.body.style.overflow="hidden"}
