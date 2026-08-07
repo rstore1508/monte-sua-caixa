@@ -142,3 +142,15 @@ body,button,input{font-family:"Satoshi","Segoe UI",Arial,sans-serif}
 .danger-link{display:block;margin:3px auto 0;padding:8px 10px;border:0;background:transparent;color:#a51245;font-size:10px;font-weight:800;text-decoration:underline}
 .delete-saved-box{min-height:34px;padding:0 9px;border:1px solid #efc0cf;border-radius:9px;background:#fff5f8;color:#a51245;font-size:9px;font-weight:850}
 @media(max-width:820px){.danger-button{min-height:52px;font-size:12px}.saved-row{grid-template-columns:auto 1fr auto!important}.saved-row b{grid-column:2}.delete-saved-box{grid-column:3;grid-row:1/3;min-height:44px}}
+/* Captura compacta e sem distorção: miniaturas sempre quadradas. */
+.print-card.capture-mode{width:720px!important;border-radius:24px!important}
+.capture-mode>header{min-height:88px!important;padding:14px 20px!important}
+.capture-mode>header img{width:175px!important;max-height:58px!important}
+.capture-mode .print-boxes{padding:14px!important}
+.capture-mode .print-box{padding:13px!important;margin-bottom:10px!important}
+.capture-mode .print-items{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+.capture-mode .print-items article{min-height:88px!important;padding:6px!important;display:flex!important;align-items:center!important;gap:7px!important;text-align:left!important}
+.capture-mode .print-items img{width:76px!important;height:76px!important;flex:0 0 76px!important;object-fit:contain!important;object-position:center!important}
+.capture-mode .print-items b{font-size:10px!important}.capture-mode .print-items span{font-size:8px!important}
+.capture-mode>footer{padding:15px 20px!important}
+.order-image-dialog #openPreparedImage{min-height:40px;margin-top:5px;border:0;background:transparent;box-shadow:none;color:var(--purple);font-size:11px;text-decoration:underline}

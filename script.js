@@ -120,9 +120,9 @@ async function saveAnonymousSelection(){
   if(error)throw error;
 }
 async function finalizeSelection(){
-  renderPrintCard();$("printOrder").hidden=false;$("saveStatus").textContent="Registrando os modelos mais escolhidos…";$("printOrder").scrollIntoView({behavior:"smooth"});
-  try{await saveAnonymousSelection();$("saveStatus").textContent="✓ Seleção registrada. Agora gere a foto do pedido.";toast("Resumo do pedido pronto ✓")}
-  catch(error){console.error("Falha ao salvar seleção",error);$("saveStatus").textContent="O resumo está pronto. A contagem online não pôde ser atualizada.";toast("Resumo pronto. A contagem online falhou.")}
+  renderPrintCard();$("printOrder").hidden=false;$("saveStatus").textContent="Registrando sua seleção…";toast("Preparando seu pedido…");
+  saveAnonymousSelection().then(()=>{$("saveStatus").textContent="✓ Seleção registrada."}).catch(error=>{console.error("Falha ao salvar seleção",error);$("saveStatus").textContent="A foto está pronta, mas a contagem online não foi atualizada."});
+  requestAnimationFrame(()=>saveOrderImage());
 }
 
 function openProductZoom(sku){zoomLevel=1;$("zoomTitle").textContent=sku;$("zoomImage").src=asset(sku);$("zoomImage").alt=`Relógio infantil ${sku}`;applyZoom();$("productZoom").hidden=false;document.body.style.overflow="hidden"}
@@ -134,24 +134,30 @@ function setMobileNavActive(active){document.querySelectorAll(".mobile-nav-item"
 function openMobileDrawer(){setMobileNavActive($("mobileBoxDock"));$("boxPanel").classList.add("mobile-open");$("mobileBoxBackdrop").classList.add("open");document.body.classList.add("drawer-open")}
 function closeMobileDrawer(){$("boxPanel").classList.remove("mobile-open");$("mobileBoxBackdrop").classList.remove("open");document.body.classList.remove("drawer-open");setMobileNavActive(document.querySelector('.mobile-nav-item[href="#montador"]'))}
 
-async function inlineImage(src){
+async function inlineImage(src,square=false){
   const response=await fetch(src,{mode:"cors",cache:"force-cache"});if(!response.ok)throw new Error(`Falha ao carregar imagem: ${src}`);
   const objectUrl=URL.createObjectURL(await response.blob());
   try{
     const image=await new Promise((resolve,reject)=>{const item=new Image();item.onload=()=>resolve(item);item.onerror=()=>reject(new Error(`Imagem inválida: ${src}`));item.src=objectUrl});
-    const naturalWidth=image.naturalWidth||900,naturalHeight=image.naturalHeight||900,scale=Math.min(1,900/naturalWidth,900/naturalHeight);
-    const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(naturalWidth*scale));canvas.height=Math.max(1,Math.round(naturalHeight*scale));
+    const naturalWidth=image.naturalWidth||900,naturalHeight=image.naturalHeight||900;
+    if(square){
+      const size=900,padding=70,scale=Math.min((size-padding*2)/naturalWidth,(size-padding*2)/naturalHeight);
+      const drawWidth=naturalWidth*scale,drawHeight=naturalHeight*scale,canvas=document.createElement("canvas");canvas.width=size;canvas.height=size;
+      canvas.getContext("2d").drawImage(image,(size-drawWidth)/2,(size-drawHeight)/2,drawWidth,drawHeight);return canvas.toDataURL("image/png",.96);
+    }
+    const scale=Math.min(1,900/naturalWidth,900/naturalHeight),canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(naturalWidth*scale));canvas.height=Math.max(1,Math.round(naturalHeight*scale));
     canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);return canvas.toDataURL("image/png",.96);
   }finally{URL.revokeObjectURL(objectUrl)}
+
 }async function makeOrderImage(){
   if(!window.html2canvas)throw new Error("Gerador de imagem indisponível");
   await document.fonts?.ready;
   const card=$("printCard");
-  const clone=card.cloneNode(true);clone.removeAttribute("id");clone.style.cssText=`position:fixed;left:-10000px;top:0;width:${Math.max(720,card.getBoundingClientRect().width)}px;z-index:99999;background:#fff`;
+  const clone=card.cloneNode(true);clone.removeAttribute("id");clone.classList.add("capture-mode");clone.style.cssText=`position:fixed;left:-10000px;top:0;width:${Math.max(720,card.getBoundingClientRect().width)}px;z-index:99999;background:#fff`;
   document.body.appendChild(clone);
   try{
     const images=[...clone.querySelectorAll("img")];
-    await Promise.all(images.map(async img=>{img.src=await inlineImage(img.src);if(img.decode)await img.decode().catch(()=>{});}));
+    await Promise.all(images.map(async img=>{img.src=await inlineImage(img.src,Boolean(img.closest(".print-items")));if(img.decode)await img.decode().catch(()=>{});}));
     const canvas=await window.html2canvas(clone,{scale:Math.min(2,window.devicePixelRatio||2),backgroundColor:"#ffffff",useCORS:false,logging:false});
     return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Não foi possível criar a imagem")),"image/png",.96));
   }finally{clone.remove()}
@@ -164,7 +170,7 @@ async function saveOrderImage(){
   const button=$("downloadImage"),original=button.innerHTML;button.disabled=true;button.textContent="Montando a foto…";
   try{
     orderImageBlob=await makeOrderImage();if(orderImageUrl)URL.revokeObjectURL(orderImageUrl);orderImageUrl=URL.createObjectURL(orderImageBlob);$("orderImagePreview").src=orderImageUrl;
-    const agent=navigator.userAgent;$("deviceSaveHint").textContent=/iPhone|iPad|iPod/i.test(agent)?"Toque em Salvar no celular e depois em Salvar Imagem.":/Android/i.test(agent)?"Toque em Salvar no celular e escolha Fotos ou Arquivos.":"Toque em Salvar no celular para guardar o PNG.";
+    const agent=navigator.userAgent;$("deviceSaveHint").textContent=/iPhone|iPad|iPod/i.test(agent)?"Toque em Salvar pedido e escolha Salvar Imagem no iPhone.":/Android/i.test(agent)?"Toque em Salvar pedido. A imagem irá para Downloads.":"Toque em Salvar pedido para baixar a imagem.";
     $("orderImageModal").hidden=false;document.body.style.overflow="hidden";toast("Foto pronta com todos os relógios ✓");
   }catch(error){console.error("Falha ao criar a imagem",error);toast("Não foi possível carregar as fotos. Tente novamente.")}
   finally{imageBusy=false;button.disabled=false;button.innerHTML=original}
@@ -172,12 +178,13 @@ async function saveOrderImage(){
 function closeOrderImage(){$("orderImageModal").hidden=true;document.body.style.overflow=""}
 async function savePreparedImage(){
   if(!orderImageBlob)return;
-  const file=new File([orderImageBlob],"pedido-tuguinho.png",{type:"image/png"});
+  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent),file=new File([orderImageBlob],"pedido-tuguinho.png",{type:"image/png"});
   try{
-    if(navigator.share&&navigator.canShare?.({files:[file]}))await navigator.share({title:"Pedido Tuguinho",files:[file]});
-    else downloadOrderImage(orderImageBlob);
-  }catch(error){if(error?.name!=="AbortError"){downloadOrderImage(orderImageBlob);toast("Foto baixada no aparelho ✓")}}
+    if(isIOS&&navigator.share&&navigator.canShare?.({files:[file]}))await navigator.share({title:"Pedido Tuguinho",files:[file]});
+    else{downloadOrderImage(orderImageBlob);toast("Pedido salvo em Downloads ✓")}
+  }catch(error){if(error?.name!=="AbortError"){downloadOrderImage(orderImageBlob);toast("Pedido baixado ✓")}}
 }
+
 function openPreparedImage(){if(orderImageUrl)window.open(orderImageUrl,"_blank","noopener")}
 function copySummary(){
   const text=orderText();

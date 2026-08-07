@@ -119,15 +119,15 @@
     <section class="print-section" id="printOrder" hidden>
       <div class="print-heading">
         <span class="eyebrow dark">PEDIDO PRONTO</span>
-        <h2>Seu pedido virou uma imagem.</h2>
-        <p>Toque no botão abaixo para baixar a foto pronta do pedido.</p>
+        <h2>Pedido pronto para enviar.</h2>
+        <p>Confira o resumo. A foto será preparada automaticamente.</p>
       </div>
       <article class="print-card" id="printCard">
         <header><img crossorigin="anonymous" src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/LOGO%20TUGUINHO%20CROP.svg" alt="Tuguinho"><div><span>SELEÇÃO DO PRÉ-SAVE</span><b id="printDate"></b></div></header>
         <div class="print-boxes" id="printBoxes"></div>
         <footer><div><span>TOTAL DA SELEÇÃO</span><b id="printTotal"></b></div><strong>Foto pronta para salvar</strong></footer>
       </article>
-      <div class="print-actions"><button class="primary download-order" id="downloadImage"><span>Gerar foto do pedido</span><b>→</b></button><button class="link-button" id="newOrder">Montar um novo pedido</button></div>
+      <div class="print-actions"><button class="primary download-order" id="downloadImage"><span>Gerar foto novamente</span><b>→</b></button><button class="link-button" id="newOrder">Montar um novo pedido</button></div>
       <p class="save-status" id="saveStatus" role="status">Registrando os modelos mais escolhidos…</p>
     </section>  </main>
 
@@ -147,13 +147,13 @@
       <span>FOTO PRONTA</span><h2 id="orderImageTitle">Salve no seu celular</h2>
       <p id="deviceSaveHint">Toque em salvar e escolha onde guardar a foto.</p>
       <div class="order-image-stage"><img id="orderImagePreview" alt="Foto pronta do pedido Tuguinho"></div>
-      <button class="primary full save-phone" id="savePreparedImage">Salvar no celular <b>↓</b></button>
-      <button class="secondary full" id="openPreparedImage">Abrir foto em tela cheia</button>
+      <button class="primary full save-phone" id="savePreparedImage">Salvar pedido <b>↓</b></button>
+      <button class="secondary full" id="openPreparedImage">Conferir em tela cheia</button>
       <small>Se preferir, pressione a foto por alguns segundos e escolha “Salvar imagem”.</small>
     </div>
   </div>
   <div class="modal-backdrop" id="completeModal" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-x" id="modalClose" aria-label="Fechar">×</button><img class="modal-package" src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/EMBALAGEM%20ABERTA.svg" alt="Caixa Tuguinho completa"><div class="success-icon">✓</div><span>CAIXA COMPLETA</span><h2 id="modalTitle">Uhu! Sua caixa está pronta!</h2><p>Você escolheu 12 Tuguinhos. Quer montar outra caixa ou finalizar?</p><div class="modal-price"><span>Valor da caixa</span><b>R$ 479,88</b></div><button class="primary full" id="finishOrder">Finalizar e criar a imagem</button><button class="secondary full" id="nextBox">Montar outra caixinha</button><button class="link-button" id="adjustBox">Voltar e ajustar</button><button class="danger-link" id="discardCompleteBox">Apagar esta caixa e recomeçar</button></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-x" id="modalClose" aria-label="Fechar">×</button><img class="modal-package" src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/EMBALAGEM%20ABERTA.svg" alt="Caixa Tuguinho completa"><div class="success-icon">✓</div><span>CAIXA COMPLETA</span><h2 id="modalTitle">Uhu! Sua caixa está pronta!</h2><p>Você escolheu 12 Tuguinhos. Quer montar outra caixa ou finalizar?</p><div class="modal-price"><span>Valor da caixa</span><b>R$ 479,88</b></div><button class="primary full" id="finishOrder">Finalizar pedido</button><button class="secondary full" id="nextBox">Montar outra caixinha</button><button class="link-button" id="adjustBox">Voltar e ajustar</button><button class="danger-link" id="discardCompleteBox">Apagar esta caixa e recomeçar</button></div>
   </div>
 
   <nav class="mobile-bottom-nav" aria-label="Navegação principal no celular">
