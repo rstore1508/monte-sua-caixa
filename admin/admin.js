@@ -97,7 +97,7 @@ function demandRows(){
       const sku=String(rawSku||"").toUpperCase();
       if(!stats.has(sku))stats.set(sku,{sku,units:0,stores:new Set()});
       stats.get(sku).units+=1;
-      if(!seen.has(sku)){stats.get(sku).stores.add(String(order.store_name||order.id).trim().toLocaleLowerCase("pt-BR"));seen.add(sku)}
+      if(!seen.has(sku)){stats.get(sku).stores.add(String(order.id));seen.add(sku)}
     });
   });
   return [...stats.values()].map(item=>({...item,stores:item.stores.size})).sort((a,b)=>b.units-a.units||b.stores-a.stores||a.sku.localeCompare(b.sku));
@@ -112,13 +112,13 @@ function renderDemand(){
   const launchUnits=rows.slice(0,launchSize).reduce((sum,item)=>sum+item.units,0);
   const share=total?Math.round(launchUnits/total*100):0;
   $("topSku").textContent=leader?.units?leader.sku:"—";
-  $("topSkuUnits").textContent=leader?.units?`${leader.units} unidade${leader.units===1?"":"s"} em ${leader.stores} loja${leader.stores===1?"":"s"}`:"Sem escolhas ainda";
+  $("topSkuUnits").textContent=leader?.units?`${leader.units} unidade${leader.units===1?"":"s"} em ${leader.stores} seleção${leader.stores===1?"":"ões"}`:"Sem escolhas ainda";
   $("activeSkus").textContent=active;
   $("launchUnits").textContent=`${launchUnits} un.`;
   $("launchShare").textContent=`${share}% da procura`;
   $("launchCallout").innerHTML=total
     ?`<span class="callout-icon">★</span><div><b>Comece pelos ${launchSize} primeiros modelos: eles concentram ${share}% da demanda.</b><p>Produzir por ondas reduz o risco de lançar os 39 SKUs ao mesmo tempo.</p></div>`
-    :`<span class="callout-icon">★</span><div><b>A recomendação aparecerá com os primeiros pré-pedidos.</b><p>Quanto mais lojas montarem suas caixas, mais segura fica a ordem de fabricação.</p></div>`;
+    :`<span class="callout-icon">★</span><div><b>A recomendação aparecerá com os primeiros pré-pedidos.</b><p>Quanto mais seleções forem finalizadas, mais segura fica a ordem de fabricação.</p></div>`;
   const maxUnits=Math.max(1,...rows.map(item=>item.units));
   $("modelRanking").innerHTML=rows.map((item,index)=>{
     const first=item.units>0&&index<launchSize;
@@ -131,7 +131,7 @@ function renderDemand(){
       <div class="model-id"><b>${escapeHtml(item.sku)}</b><small>${percent}% da procura total</small></div>
       <div class="demand-visual"><div class="demand-bar"><i style="width:${item.units/maxUnits*100}%"></i></div></div>
       <div class="model-stat"><b>${item.units} un.</b><small>pré-selecionadas</small></div>
-      <div class="model-stat stores-stat"><b>${item.stores}</b><small>loja${item.stores===1?"":"s"}</small></div>
+      <div class="model-stat stores-stat"><b>${item.stores}</b><small>seleção${item.stores===1?"":"ões"}</small></div>
       <span class="wave-badge ${wave[0]}">${wave[1]}</span>
     </article>`;
   }).join("");
@@ -141,7 +141,7 @@ function filteredOrders(){
   const status=$("statusFilter").value;
   return orders.filter(order=>{
     const matchesStatus=status==="todos"||order.status===status;
-    const haystack=[order.store_name,order.buyer_name,order.phone,order.representative].join(" ").toLocaleLowerCase("pt-BR");
+    const haystack=[order.id,order.store_name,order.buyer_name,order.phone,order.representative,...(Array.isArray(order.boxes)?order.boxes.flat():[])].join(" ").toLocaleLowerCase("pt-BR");
     return matchesStatus&&(!term||haystack.includes(term));
   });
 }
@@ -152,8 +152,8 @@ function renderOrders(){
   $("emptyState").hidden=list.length!==0;
   $("ordersList").innerHTML=list.map(order=>`
     <article class="order-row">
-      <div class="order-main"><b>${escapeHtml(order.store_name)}</b><span>${escapeHtml(order.buyer_name)} · ${escapeHtml(order.phone)}</span></div>
-      <div class="cell"><b>${escapeHtml(order.representative)}</b><span>Representante</span></div>
+      <div class="order-main"><b>${order.store_name?escapeHtml(order.store_name):`Seleção #${String(order.id).padStart(5,"0")}`}</b><span>${order.buyer_name?`${escapeHtml(order.buyer_name)} · ${escapeHtml(order.phone||"")}`:"Sem dados pessoais"}</span></div>
+      <div class="cell"><b>${order.representative?escapeHtml(order.representative):"Anônima"}</b><span>${order.representative?"Representante":"Origem"}</span></div>
       <div class="cell"><b>${order.box_count}</b><span>caixa${order.box_count===1?"":"s"}</span></div>
       <div class="cell hide-medium"><b>${money(order.total_amount)}</b><span>valor potencial</span></div>
       <div><span class="status status-${order.status}">${statusLabels[order.status]||escapeHtml(order.status)}</span></div>
@@ -172,11 +172,11 @@ function openOrder(id){
   if(!order)return;
   $("dialogContent").innerHTML=`<div class="dialog-body">
     <span class="eyebrow">PEDIDO #${String(order.id).padStart(5,"0")}</span>
-    <h2>${escapeHtml(order.store_name)}</h2>
+    <h2>${order.store_name?escapeHtml(order.store_name):`Seleção anônima #${String(order.id).padStart(5,"0")}`}</h2>
     <div class="dialog-meta">
-      <div><span>Comprador</span><b>${escapeHtml(order.buyer_name)}</b></div>
-      <div><span>Telefone / WhatsApp</span><b>${escapeHtml(order.phone)}</b></div>
-      <div><span>Representante</span><b>${escapeHtml(order.representative)}</b></div>
+      <div><span>Comprador</span><b>${order.buyer_name?escapeHtml(order.buyer_name):"Não solicitado"}</b></div>
+      <div><span>Telefone / WhatsApp</span><b>${order.phone?escapeHtml(order.phone):"Não solicitado"}</b></div>
+      <div><span>Representante</span><b>${order.representative?escapeHtml(order.representative):"Não solicitado"}</b></div>
       <div><span>Recebido em</span><b>${dateTime(order.created_at)}</b></div>
       <div><span>Quantidade</span><b>${order.box_count} caixa${order.box_count===1?"":"s"} · ${order.item_count} relógios</b></div>
       <div><span>Valor potencial</span><b>${money(order.total_amount)}</b></div>
@@ -213,6 +213,8 @@ async function saveOrderStatus(id){
 }
 
 (async()=>{const {data:{session}}=await db.auth.getSession();await enterAdmin(session)})();
+
+
 
 
 

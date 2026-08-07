@@ -41,7 +41,7 @@
     </aside>
 
     <main class="dashboard" id="pedidos">
-      <header class="dash-header"><div><p class="eyebrow">VISÃO GERAL</p><h1>Pré-pedidos das lojas</h1><p>Acompanhe cada caixa enviada pelo montador Tuguinho.</p></div><button class="refresh" id="refreshButton">↻ Atualizar</button></header>
+      <header class="dash-header"><div><p class="eyebrow">VISÃO GERAL</p><h1>Seleções do pré-save</h1><p>Veja as caixas anônimas e descubra quais modelos devem ser fabricados primeiro.</p></div><button class="refresh" id="refreshButton">↻ Atualizar</button></header>
       <section class="metrics" aria-label="Resumo de pedidos">
         <article><span>Pedidos</span><b id="metricOrders">0</b><small>recebidos</small></article>
         <article><span>Caixas</span><b id="metricBoxes">0</b><small>montadas</small></article>
@@ -71,15 +71,15 @@
         </div>
         <div class="launch-callout" id="launchCallout">
           <span class="callout-icon">★</span>
-          <div><b>A recomendação aparecerá com os primeiros pré-pedidos.</b><p>Quanto mais lojas montarem suas caixas, mais segura fica a ordem de fabricação.</p></div>
+          <div><b>A recomendação aparecerá com os primeiros pré-pedidos.</b><p>Quanto mais seleções forem finalizadas, mais segura fica a ordem de fabricação.</p></div>
         </div>
         <div class="model-ranking" id="modelRanking"></div>
         <p class="ranking-note">A ordem é uma recomendação comercial baseada no volume do pré-save. Ela não inicia fabricação automaticamente.</p>
       </section>
       <section class="orders-panel">
-        <div class="panel-head"><div><h2>Pedidos recebidos</h2><span id="resultsCount">0 resultados</span></div><div class="filters"><label class="search"><span>⌕</span><input id="orderSearch" type="search" placeholder="Loja, comprador ou telefone"></label><select id="statusFilter" aria-label="Filtrar por status"><option value="todos">Todos os status</option><option value="novo">Novos</option><option value="em_contato">Em contato</option><option value="confirmado">Confirmados</option><option value="cancelado">Cancelados</option></select></div></div>
+        <div class="panel-head"><div><h2>Seleções recebidas</h2><span id="resultsCount">0 resultados</span></div><div class="filters"><label class="search"><span>⌕</span><input id="orderSearch" type="search" placeholder="SKU ou número da seleção"></label><select id="statusFilter" aria-label="Filtrar por status"><option value="todos">Todos os status</option><option value="novo">Novos</option><option value="em_contato">Em contato</option><option value="confirmado">Confirmados</option><option value="cancelado">Cancelados</option></select></div></div>
         <div class="loading" id="loadingState">Carregando pedidos…</div>
-        <div class="empty" id="emptyState" hidden><span>☆</span><h3>Nenhum pedido por aqui.</h3><p>Os pré-pedidos enviados pelo site aparecerão automaticamente nesta área.</p></div>
+        <div class="empty" id="emptyState" hidden><span>☆</span><h3>Nenhum pedido por aqui.</h3><p>As seleções finalizadas no site aparecerão automaticamente nesta área.</p></div>
         <div class="orders-list" id="ordersList"></div>
       </section>
     </main>
@@ -96,6 +96,8 @@
   <script src="/admin/admin.js"></script>
 </body>
 </html>
+
+
 
 
 
