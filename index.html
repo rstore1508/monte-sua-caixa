@@ -42,8 +42,13 @@
     </section>
 
     <section class="builder" id="montador">
+
       <div class="catalog-panel">
         <div class="section-title"><span>01</span><div><h2>Escolha os relógios</h2><p>Adicione 12 peças. Você pode repetir o mesmo SKU.</p></div></div>
+        <div class="catalog-mobile-progress" aria-live="polite">
+          <div><b id="catalogProgressText">0 de 12 escolhidos</b><span id="catalogProgressHint">Faltam 12 relógios</span></div>
+          <div class="catalog-progress-track" role="progressbar" aria-label="Progresso da caixa" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0" id="catalogProgressBar"><i></i></div>
+        </div>
         <div class="catalog-tools">
           <label class="search"><span>⌕</span><input id="search" type="search" placeholder="Buscar por SKU" autocomplete="off"></label>
           <span class="catalog-count"><b id="visibleCount">39</b> modelos</span>
@@ -62,7 +67,7 @@
         </div>
         <div class="subtotal"><span>Subtotal desta caixa</span><b id="subtotal">R$ 0,00</b></div>
         <button class="primary full" id="confirmBox" disabled>Faltam 12 para completar</button>
-        <button class="link-button" id="clearBox" hidden>Limpar caixa atual</button>
+        <button class="danger-button" id="clearBox" hidden><span aria-hidden="true">⌫</span> Esvaziar esta caixinha</button>
         <div class="saved-boxes" id="savedBoxes" hidden><b>CAIXAS CONFIRMADAS</b><div id="savedBoxesList"></div></div>      </aside>
       <button class="mobile-box-backdrop" id="mobileBoxBackdrop" aria-label="Fechar visualização da caixa" tabindex="-1"></button>
     </section>
@@ -148,10 +153,23 @@
     </div>
   </div>
   <div class="modal-backdrop" id="completeModal" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-x" id="modalClose" aria-label="Fechar">×</button><img class="modal-package" src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/EMBALAGEM%20ABERTA.svg" alt="Caixa Tuguinho completa"><div class="success-icon">✓</div><span>CAIXA COMPLETA</span><h2 id="modalTitle">Uhu! Sua caixa está pronta!</h2><p>Você escolheu 12 Tuguinhos. Quer montar outra caixa ou finalizar?</p><div class="modal-price"><span>Valor da caixa</span><b>R$ 479,88</b></div><button class="primary full" id="finishOrder">Finalizar e criar a imagem</button><button class="secondary full" id="nextBox">Montar outra caixinha</button><button class="link-button" id="adjustBox">Voltar e ajustar</button></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-x" id="modalClose" aria-label="Fechar">×</button><img class="modal-package" src="https://xplvzmmpkmqqgifbrdue.supabase.co/storage/v1/object/public/tuguinho-assets/EMBALAGEM%20ABERTA.svg" alt="Caixa Tuguinho completa"><div class="success-icon">✓</div><span>CAIXA COMPLETA</span><h2 id="modalTitle">Uhu! Sua caixa está pronta!</h2><p>Você escolheu 12 Tuguinhos. Quer montar outra caixa ou finalizar?</p><div class="modal-price"><span>Valor da caixa</span><b>R$ 479,88</b></div><button class="primary full" id="finishOrder">Finalizar e criar a imagem</button><button class="secondary full" id="nextBox">Montar outra caixinha</button><button class="link-button" id="adjustBox">Voltar e ajustar</button><button class="danger-link" id="discardCompleteBox">Apagar esta caixa e recomeçar</button></div>
   </div>
 
-  <button class="mobile-box-dock" id="mobileBoxDock" aria-label="Ver minha caixa"><span><b id="mobileBoxCount">0/12</b><small>Ver caixinha</small></span><strong id="mobileBoxTotal">R$ 0,00</strong><i>↑</i></button>
+  <nav class="mobile-bottom-nav" aria-label="Navegação principal no celular">
+    <a class="mobile-nav-item" href="#inicio" aria-label="Ir para o início">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8v9.7a.5.5 0 0 1-.5.5h-5.2v-6.2H8.7V21H3.5a.5.5 0 0 1-.5-.5v-9.7Z"/></svg>
+      <span>Início</span>
+    </a>
+    <a class="mobile-nav-item is-active" href="#montador" aria-current="page" aria-label="Escolher relógios">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6l1 4.2a6.5 6.5 0 0 1 0 11.6L15 22H9l-1-4.2a6.5 6.5 0 0 1 0-11.6L9 2Zm3 5.2a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 0 0 0-9.6Zm.8 1.8v3.4l2.1 1.3-.8 1.2-2.8-1.8V9h1.5Z"/></svg>
+      <span>Relógios</span>
+    </a>
+    <button class="mobile-nav-item mobile-nav-box" id="mobileBoxDock" type="button" aria-label="Abrir minha caixa, 0 de 12 relógios">
+      <span class="mobile-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Zm1 2.1 7 3.1v8.5l-7-3.1V9.1Zm9 3.1 7-3.1v8.5l-7 3.1v-8.5Z"/></svg><b id="mobileBoxCount">0/12</b></span>
+      <span>Minha caixa</span>
+    </button>
+  </nav>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>

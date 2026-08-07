@@ -4,7 +4,7 @@ const PRICE=39.99,BOX_SIZE=12,STORAGE_KEY="tuguinho-monte-sua-caixa-v3";
 let state={current:[],boxes:[]};
 let zoomLevel=1;
 let toastTimer;
-let imageBusy=false;
+let imageBusy=false,orderImageBlob=null,orderImageUrl="";
 const $=id=>document.getElementById(id);
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const asset=sku=>`${ASSET_BASE}/${encodeURIComponent(sku)}.svg`;
@@ -28,7 +28,7 @@ function renderProducts(filter=""){
       ${count?`<span class="product-badge">${count} na caixa</span>`:""}
       <button class="product-photo zoom-trigger" type="button" aria-label="Ampliar relógio ${sku}"><img src="${asset(sku)}" alt="Relógio infantil ${sku}" loading="lazy"><span>⌕ VER DETALHES</span></button>
       <h3>${sku}</h3><b class="product-price">R$ 39,99</b>
-      <div class="quantity"><button class="remove" ${count?"":"disabled"} aria-label="Remover ${sku}">−</button><b>${count}</b><button class="add" ${state.current.length>=BOX_SIZE?"disabled":""} aria-label="Adicionar ${sku}">+</button></div>
+      <div class="quantity"><button class="remove" ${count?"":"disabled"} aria-label="Remover ${sku}">−</button><b>${count}</b><button class="add" ${state.current.length>=BOX_SIZE?"disabled":""} aria-label="Adicionar ${sku}"><span>${count?"Mais":"Adicionar"}</span><b>+</b></button></div>
     </article>`;
   }).join(""):`<div class="empty-result">Nenhum SKU encontrado.</div>`;
   document.querySelectorAll(".product").forEach(card=>{
@@ -57,7 +57,12 @@ function removeProduct(sku){const index=state.current.lastIndexOf(sku);if(index<
 function progressMessage(){const n=state.current.length;if(n===0)return"Toque no + para colocar o primeiro relógio.";if(n===12)return"✓ Caixinha completa. Agora veja seu pedido!";if(n===6)return"Metade pronta. Continue escolhendo!";if(n===11)return"Só falta 1 relógio.";return`Escolha mais ${12-n} relógio${12-n===1?"":"s"}.`}
 
 function renderBox(){
-  const n=state.current.length;
+  const n=state.current.length,remaining=BOX_SIZE-n;
+  document.body.classList.toggle("first-choice",n===0);
+  $("catalogProgressText").textContent=`${n} de 12 escolhidos`;
+  $("catalogProgressHint").textContent=n===12?"Caixa completa!":`Faltam ${remaining} relógio${remaining===1?"":"s"}`;
+  $("catalogProgressBar").setAttribute("aria-valuenow",n);
+  $("catalogProgressBar").querySelector("i").style.width=`${(n/BOX_SIZE)*100}%`;
   $("boxNumber").textContent=state.boxes.length+1;
   $("boxCount").innerHTML=`${n}<small>/12</small>`;
   $("progressMessage").textContent=progressMessage();$("progressMessage").classList.toggle("complete",n===12);
@@ -67,15 +72,27 @@ function renderBox(){
   document.querySelectorAll(".slot.full").forEach(slot=>slot.querySelector("button").onclick=()=>{state.current.splice(Number(slot.dataset.index),1);save();render()});
   const confirm=$("confirmBox");confirm.disabled=n!==12;confirm.textContent=n===12?`Concluir caixinha ${state.boxes.length+1} →`:`Escolha mais ${12-n}`;
   $("clearBox").hidden=n===0;
-  $("mobileBoxCount").textContent=`${n}/12`;$("mobileBoxTotal").textContent=n?"VER CAIXINHA":"COMEÇAR";
+  $("mobileBoxCount").textContent=`${n}/12`;$("mobileBoxDock").querySelector(":scope > span:last-child").textContent=n===12?"Finalizar":"Minha caixa";$("mobileBoxDock").setAttribute("aria-label",n===12?"Caixa completa. Finalizar pedido":`Abrir minha caixa, ${n} de 12 relógios`);$("mobileBoxDock").classList.toggle("ready",n===12);
 }
 function renderSaved(){
   const count=state.boxes.length;
   $("headerBoxes").textContent=count?`${count} caixinha${count===1?"":"s"} pronta${count===1?"":"s"}`:"Sua seleção";
   $("headerUnits").textContent=`${state.current.length}/12`;
   $("savedBoxes").hidden=count===0;
-  $("savedBoxesList").innerHTML=state.boxes.map((box,i)=>`<div class="saved-row"><div class="saved-thumbs">${box.slice(0,4).map(sku=>`<img src="${asset(sku)}" alt="">`).join("")}<i>+8</i></div><span>✓ Caixinha ${i+1}</span><b>12 peças</b></div>`).join("");
+  $("savedBoxesList").innerHTML=state.boxes.map((box,i)=>`<div class="saved-row"><div class="saved-thumbs">${box.slice(0,4).map(sku=>`<img src="${asset(sku)}" alt="">`).join("")}<i>+8</i></div><span>✓ Caixinha ${i+1}</span><b>12 peças</b><button class="delete-saved-box" type="button" data-box-index="${i}" aria-label="Excluir caixinha ${i+1}">Excluir</button></div>`).join("");
+  document.querySelectorAll(".delete-saved-box").forEach(button=>button.onclick=()=>deleteSavedBox(Number(button.dataset.boxIndex)));
 }
+function emptyCurrentBox(){
+  if(!state.current.length)return;
+  if(!confirm("Esvaziar esta caixinha? Todos os relógios escolhidos nela serão removidos."))return;
+  state.current=[];save();closeModal();render();toast("Caixinha esvaziada. Você pode começar novamente.");
+}
+function deleteSavedBox(index){
+  if(!state.boxes[index])return;
+  if(!confirm(`Excluir a caixinha ${index+1}? Essa ação removerá os 12 relógios dela.`))return;
+  state.boxes.splice(index,1);save();render();toast("Caixinha excluída.");
+}
+
 function render(){renderProducts($("search").value);renderBox();renderSaved()}
 
 function openCompleteModal(){$("completeModal").hidden=false;document.body.style.overflow="hidden";$("modalTitle").textContent=`Caixinha ${state.boxes.length+1} pronta!`}
@@ -104,24 +121,33 @@ async function saveAnonymousSelection(){
 }
 async function finalizeSelection(){
   renderPrintCard();$("printOrder").hidden=false;$("saveStatus").textContent="Registrando os modelos mais escolhidos…";$("printOrder").scrollIntoView({behavior:"smooth"});
-  try{await saveAnonymousSelection();$("saveStatus").textContent="✓ Seleção registrada. Agora envie a imagem ao seu representante.";toast("Imagem do pedido pronta ✓")}
-  catch(error){console.error("Falha ao salvar seleção",error);$("saveStatus").textContent="A imagem está pronta. A contagem online não pôde ser atualizada.";toast("Imagem pronta. A contagem online falhou.")}
+  try{await saveAnonymousSelection();$("saveStatus").textContent="✓ Seleção registrada. Agora gere a foto do pedido.";toast("Resumo do pedido pronto ✓")}
+  catch(error){console.error("Falha ao salvar seleção",error);$("saveStatus").textContent="O resumo está pronto. A contagem online não pôde ser atualizada.";toast("Resumo pronto. A contagem online falhou.")}
 }
 
 function openProductZoom(sku){zoomLevel=1;$("zoomTitle").textContent=sku;$("zoomImage").src=asset(sku);$("zoomImage").alt=`Relógio infantil ${sku}`;applyZoom();$("productZoom").hidden=false;document.body.style.overflow="hidden"}
 function closeProductZoom(){$("productZoom").hidden=true;document.body.style.overflow=""}
 function applyZoom(){$("zoomImage").style.transform=`scale(${zoomLevel})`;$("zoomValue").textContent=`${Math.round(zoomLevel*100)}%`;$("zoomOut").disabled=zoomLevel<=1;$("zoomIn").disabled=zoomLevel>=2.5}
 function changeZoom(delta){zoomLevel=Math.min(2.5,Math.max(1,zoomLevel+delta));applyZoom()}
-function openMobileDrawer(){$("boxPanel").classList.add("mobile-open");$("mobileBoxBackdrop").classList.add("open");document.body.classList.add("drawer-open")}
-function closeMobileDrawer(){$("boxPanel").classList.remove("mobile-open");$("mobileBoxBackdrop").classList.remove("open");document.body.classList.remove("drawer-open")}
+function setMobileNavActive(active){document.querySelectorAll(".mobile-nav-item").forEach(item=>{const on=item===active;item.classList.toggle("active",on);if(on)item.setAttribute("aria-current","page");else item.removeAttribute("aria-current")})}
 
-function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob)})}
-async function inlineImage(src){const response=await fetch(src,{mode:"cors",cache:"force-cache"});if(!response.ok)throw new Error(`Falha ao carregar imagem: ${src}`);return blobToDataUrl(await response.blob())}
-async function makeOrderImage(){
+function openMobileDrawer(){setMobileNavActive($("mobileBoxDock"));$("boxPanel").classList.add("mobile-open");$("mobileBoxBackdrop").classList.add("open");document.body.classList.add("drawer-open")}
+function closeMobileDrawer(){$("boxPanel").classList.remove("mobile-open");$("mobileBoxBackdrop").classList.remove("open");document.body.classList.remove("drawer-open");setMobileNavActive(document.querySelector('.mobile-nav-item[href="#montador"]'))}
+
+async function inlineImage(src){
+  const response=await fetch(src,{mode:"cors",cache:"force-cache"});if(!response.ok)throw new Error(`Falha ao carregar imagem: ${src}`);
+  const objectUrl=URL.createObjectURL(await response.blob());
+  try{
+    const image=await new Promise((resolve,reject)=>{const item=new Image();item.onload=()=>resolve(item);item.onerror=()=>reject(new Error(`Imagem inválida: ${src}`));item.src=objectUrl});
+    const naturalWidth=image.naturalWidth||900,naturalHeight=image.naturalHeight||900,scale=Math.min(1,900/naturalWidth,900/naturalHeight);
+    const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(naturalWidth*scale));canvas.height=Math.max(1,Math.round(naturalHeight*scale));
+    canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);return canvas.toDataURL("image/png",.96);
+  }finally{URL.revokeObjectURL(objectUrl)}
+}async function makeOrderImage(){
   if(!window.html2canvas)throw new Error("Gerador de imagem indisponível");
   await document.fonts?.ready;
   const card=$("printCard");
-  const clone=card.cloneNode(true);clone.removeAttribute("id");clone.style.cssText=`position:fixed;left:-10000px;top:0;width:${card.getBoundingClientRect().width}px;z-index:-1;background:#fff`;
+  const clone=card.cloneNode(true);clone.removeAttribute("id");clone.style.cssText=`position:fixed;left:-10000px;top:0;width:${Math.max(720,card.getBoundingClientRect().width)}px;z-index:99999;background:#fff`;
   document.body.appendChild(clone);
   try{
     const images=[...clone.querySelectorAll("img")];
@@ -135,11 +161,24 @@ function downloadOrderImage(blob){
 }
 async function saveOrderImage(){
   if(imageBusy)return;imageBusy=true;
-  const button=$("downloadImage");const original=button.innerHTML;button.disabled=true;button.textContent="Carregando fotos…";
-  try{const blob=await makeOrderImage();downloadOrderImage(blob);toast("Foto do pedido baixada ✓")}
-  catch(error){console.error("Falha ao criar a imagem",error);toast("Não foi possível carregar as fotos. Tente novamente.")}
+  const button=$("downloadImage"),original=button.innerHTML;button.disabled=true;button.textContent="Montando a foto…";
+  try{
+    orderImageBlob=await makeOrderImage();if(orderImageUrl)URL.revokeObjectURL(orderImageUrl);orderImageUrl=URL.createObjectURL(orderImageBlob);$("orderImagePreview").src=orderImageUrl;
+    const agent=navigator.userAgent;$("deviceSaveHint").textContent=/iPhone|iPad|iPod/i.test(agent)?"Toque em Salvar no celular e depois em Salvar Imagem.":/Android/i.test(agent)?"Toque em Salvar no celular e escolha Fotos ou Arquivos.":"Toque em Salvar no celular para guardar o PNG.";
+    $("orderImageModal").hidden=false;document.body.style.overflow="hidden";toast("Foto pronta com todos os relógios ✓");
+  }catch(error){console.error("Falha ao criar a imagem",error);toast("Não foi possível carregar as fotos. Tente novamente.")}
   finally{imageBusy=false;button.disabled=false;button.innerHTML=original}
 }
+function closeOrderImage(){$("orderImageModal").hidden=true;document.body.style.overflow=""}
+async function savePreparedImage(){
+  if(!orderImageBlob)return;
+  const file=new File([orderImageBlob],"pedido-tuguinho.png",{type:"image/png"});
+  try{
+    if(navigator.share&&navigator.canShare?.({files:[file]}))await navigator.share({title:"Pedido Tuguinho",files:[file]});
+    else downloadOrderImage(orderImageBlob);
+  }catch(error){if(error?.name!=="AbortError"){downloadOrderImage(orderImageBlob);toast("Foto baixada no aparelho ✓")}}
+}
+function openPreparedImage(){if(orderImageUrl)window.open(orderImageUrl,"_blank","noopener")}
 function copySummary(){
   const text=orderText();
   if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text).then(()=>toast("Resumo copiado ✓")).catch(()=>fallbackCopy(text))}else fallbackCopy(text);
@@ -163,18 +202,19 @@ function setupRevealAnimations(){
 }
 
 // Eventos principais
+document.querySelectorAll(".mobile-nav-item[href]").forEach(link=>link.addEventListener("click",()=>{closeMobileDrawer();setMobileNavActive(link)}));
 document.querySelectorAll("[data-scroll]").forEach(button=>button.onclick=()=>$(button.dataset.scroll).scrollIntoView({behavior:"smooth"}));
 $("search").oninput=event=>renderProducts(event.target.value);
-$("clearBox").onclick=()=>{if(confirm("Limpar todos os relógios da caixinha atual?")){state.current=[];save();render()}};
-$("confirmBox").onclick=openCompleteModal;$("modalClose").onclick=closeModal;$("adjustBox").onclick=closeModal;
+$("clearBox").onclick=emptyCurrentBox;
+$("confirmBox").onclick=openCompleteModal;$("modalClose").onclick=closeModal;$("adjustBox").onclick=closeModal;$("discardCompleteBox").onclick=emptyCurrentBox;
 $("nextBox").onclick=()=>confirmCurrent(true);$("finishOrder").onclick=()=>confirmCurrent(false);
 $("completeModal").onclick=event=>{if(event.target===$("completeModal"))closeModal()};
-$("mobileBoxDock").onclick=openMobileDrawer;$("closeMobileBox").onclick=closeMobileDrawer;$("mobileBoxBackdrop").onclick=closeMobileDrawer;
+$("mobileBoxDock").onclick=()=>state.current.length===BOX_SIZE?openCompleteModal():openMobileDrawer();$("closeMobileBox").onclick=closeMobileDrawer;$("mobileBoxBackdrop").onclick=closeMobileDrawer;
 $("zoomClose").onclick=closeProductZoom;$("zoomOut").onclick=()=>changeZoom(-.25);$("zoomIn").onclick=()=>changeZoom(.25);$("productZoom").onclick=event=>{if(event.target===$("productZoom"))closeProductZoom()};
-$("downloadImage").onclick=saveOrderImage;
+$("downloadImage").onclick=saveOrderImage;$("savePreparedImage").onclick=savePreparedImage;$("openPreparedImage").onclick=openPreparedImage;$("orderImageClose").onclick=closeOrderImage;$("orderImageModal").onclick=event=>{if(event.target===$("orderImageModal"))closeOrderImage()};
 $("newOrder").onclick=()=>{if(confirm("Começar uma nova seleção?")){state={current:[],boxes:[]};save();$("printOrder").hidden=true;render();$("montador").scrollIntoView({behavior:"smooth"})}};
 window.addEventListener("scroll",()=>document.querySelector(".topbar")?.classList.toggle("scrolled",scrollY>24),{passive:true});
-document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(!$("completeModal").hidden)closeModal();if(!$("productZoom").hidden)closeProductZoom();closeMobileDrawer()}});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(!$("completeModal").hidden)closeModal();if(!$("productZoom").hidden)closeProductZoom();if(!$("orderImageModal").hidden)closeOrderImage();closeMobileDrawer()}});
 
 load();render();setupStory();setupRevealAnimations();
 (function(){const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;const intro=$("brandIntro");const seen=sessionStorage.getItem("tuguinho-intro-seen");if(intro&&!reduced&&!seen){document.body.classList.add("intro-lock");sessionStorage.setItem("tuguinho-intro-seen","1");setTimeout(()=>{intro.classList.add("done");document.body.classList.remove("intro-lock")},1450)}else intro?.classList.add("done")})();
