@@ -173,3 +173,13 @@ body,button,input{font-family:"Satoshi","Segoe UI",Arial,sans-serif}
   .order-image-stage img{width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;object-position:center;border-radius:11px}
   .order-image-dialog .modal-x{top:12px;right:12px;width:40px;height:40px}
 }
+
+/* Disponibilidade do pré-lançamento: estoque real protegido pelo Supabase. */
+.stock-label{display:block;min-height:18px;margin:-3px 0 8px;color:#6f6e83;font-size:9px;font-weight:800}
+.stock-label.stock-low{color:#b44b00}
+.stock-label.stock-low:before{content:"●";margin-right:5px;color:var(--orange)}
+.stock-label.stock-out{color:#a51245}
+.product.sold-out{background:#f4f1f6;filter:saturate(.45)}
+.product.sold-out .product-photo img{opacity:.52}
+.product.sold-out .quantity .add{background:#e4dfe9;color:#777080}
+@media(max-width:520px){.stock-label{font-size:10px;min-height:20px}}
