@@ -2,3 +2,29 @@
 /* Alertas de disponibilidade ligados ao limite real de 200 unidades por SKU. */
 .wave-stock-low{background:#fff0d5;color:#a14a00;box-shadow:inset 0 0 0 1px #f3c478}
 .wave-stock-out{background:#ffe4ec;color:#a51245;box-shadow:inset 0 0 0 1px #efb6c9}
+
+/* Ritmo diário das caixas registradas no Supabase. */
+.daily-panel{margin:0 0 30px;padding:26px;border:1px solid #ded3ef;border-radius:24px;background:#fff;box-shadow:0 16px 48px rgba(55,23,113,.07)}
+.daily-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+.daily-head h2{margin:7px 0 5px;color:var(--purple-dark);font-size:clamp(24px,3vw,34px);letter-spacing:-.04em}
+.daily-head>div>p:last-child{margin:0;color:var(--muted);font-size:12px}
+.daily-range{min-width:150px;color:var(--muted);font-size:10px;font-weight:900}
+.daily-range select{width:100%;height:42px;margin-top:6px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--purple-dark);font-weight:800}
+.daily-summary{margin:22px 0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.daily-summary article{padding:15px 17px;border:1px solid var(--line);border-radius:15px;background:#faf8fe}
+.daily-summary span,.daily-summary b,.daily-summary small{display:block}
+.daily-summary span{color:var(--muted);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.daily-summary b{margin:6px 0 2px;color:var(--purple-dark);font-size:23px}
+.daily-summary small{color:#938da0;font-size:9px}
+.daily-chart-scroll{overflow-x:auto;padding:6px 2px 2px;scrollbar-width:thin}
+.daily-chart{min-width:calc(var(--days)*38px);height:230px;display:grid;grid-template-columns:repeat(var(--days),minmax(28px,1fr));align-items:end;gap:7px}
+.daily-column{height:100%;display:grid;grid-template-rows:24px 1fr 16px 14px;text-align:center;min-width:0}
+.daily-column>b{align-self:end;color:var(--purple-dark);font-size:10px}
+.daily-track{position:relative;height:100%;border-radius:9px;background:#f1edf7;overflow:hidden}
+.daily-track i{position:absolute;inset:auto 0 0;border-radius:9px 9px 5px 5px;background:linear-gradient(180deg,var(--pink),var(--purple));animation:growDaily .7s var(--ease) both;transform-origin:bottom}
+.daily-column.is-today .daily-track{box-shadow:0 0 0 2px rgba(255,215,46,.75)}
+.daily-column.is-today .daily-track i{background:linear-gradient(180deg,var(--orange),var(--yellow))}
+.daily-column>span{align-self:end;color:var(--purple-dark);font-size:9px;font-weight:900;text-transform:capitalize}
+.daily-column>small{color:var(--muted);font-size:8px}
+@keyframes growDaily{from{transform:scaleY(0)}}
+@media(max-width:760px){.daily-panel{padding:20px 14px}.daily-head{display:block}.daily-range{display:block;margin-top:15px}.daily-summary{grid-template-columns:1fr 1fr;gap:7px}.daily-chart{height:190px}.daily-column{grid-template-rows:22px 1fr 15px 13px}}

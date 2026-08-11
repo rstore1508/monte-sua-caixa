@@ -52,6 +52,7 @@ $("refreshButton").onclick=()=>loadOrders(true);
 $("orderSearch").oninput=renderOrders;
 $("statusFilter").onchange=renderOrders;
 $("launchSize").onchange=renderDemand;
+$("dailyRange").onchange=renderDailyBoxes;
 $("dialogClose").onclick=()=>$("orderDialog").close();
 $("orderDialog").onclick=event=>{if(event.target===$("orderDialog"))$("orderDialog").close()};
 
@@ -77,9 +78,48 @@ async function loadOrders(manual=false){
   inventoryRows=stockData||[];
   orders=loaded;
   updateMetrics();
+  renderDailyBoxes();
   renderDemand();
   renderOrders();
   if(manual)toast("Pedidos atualizados.");
+}
+
+function localDayKey(value){
+  const date=value instanceof Date?value:new Date(value);
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+}
+function dailyBoxRows(days){
+  const totals=new Map();
+  orders.filter(order=>order.status!=="cancelado").forEach(order=>{
+    const key=localDayKey(order.created_at);
+    const boxes=Number(order.box_count||((Array.isArray(order.boxes)&&order.boxes.length)||0));
+    totals.set(key,(totals.get(key)||0)+boxes);
+  });
+  const today=new Date();
+  return Array.from({length:days},(_,index)=>{
+    const date=new Date(today.getFullYear(),today.getMonth(),today.getDate()-(days-index-1));
+    return {date,key:localDayKey(date),boxes:totals.get(localDayKey(date))||0};
+  });
+}
+function renderDailyBoxes(){
+  const days=Number($("dailyRange").value||7);
+  const rows=dailyBoxRows(days);
+  const total=rows.reduce((sum,item)=>sum+item.boxes,0);
+  const peak=rows.reduce((best,item)=>item.boxes>best.boxes?item:best,rows[0]);
+  const max=Math.max(1,...rows.map(item=>item.boxes));
+  $("dailyToday").textContent=rows.at(-1)?.boxes||0;
+  $("dailyTotal").textContent=total;
+  $("dailyAverage").textContent=(total/days).toLocaleString("pt-BR",{maximumFractionDigits:1});
+  $("dailyPeak").textContent=peak?.boxes?peak.date.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}):"—";
+  $("dailyPeakValue").textContent=`${peak?.boxes||0} caixa${peak?.boxes===1?"":"s"}`;
+  $("dailyChart").style.setProperty("--days",days);
+  $("dailyChart").setAttribute("aria-label",`${total} caixas nos últimos ${days} dias. Melhor dia: ${peak?.boxes||0} caixas.`);
+  $("dailyChart").innerHTML=rows.map((item,index)=>{
+    const height=item.boxes?Math.max(8,item.boxes/max*100):2;
+    const label=days<=14?item.date.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".",""):String(item.date.getDate()).padStart(2,"0");
+    const fullDate=item.date.toLocaleDateString("pt-BR");
+    return `<div class="daily-column ${index===rows.length-1?"is-today":""}" title="${fullDate}: ${item.boxes} caixa${item.boxes===1?"":"s"}"><b>${item.boxes}</b><div class="daily-track"><i style="height:${height}%"></i></div><span>${label}</span><small>${String(item.date.getDate()).padStart(2,"0")}/${String(item.date.getMonth()+1).padStart(2,"0")}</small></div>`;
+  }).join("");
 }
 
 function updateMetrics(){

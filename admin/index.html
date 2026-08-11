@@ -34,6 +34,7 @@
       <span class="side-label">PAINEL COMERCIAL</span>
       <nav>
         <a class="active" href="#pedidos"><i>▦</i> Pedidos</a>
+        <a href="#ritmo"><i>▥</i> Caixas por dia</a>
         <a href="#modelos"><i>◉</i> Modelos em alta</a>
       </nav>
       <div class="profile"><span id="profileInitial">R</span><div><b id="profileName">Rogério</b><small>Administrador</small></div></div>
@@ -47,6 +48,19 @@
         <article><span>Caixas</span><b id="metricBoxes">0</b><small>montadas</small></article>
         <article><span>Relógios</span><b id="metricItems">0</b><small>selecionados</small></article>
         <article class="metric-value"><span>Valor potencial</span><b id="metricValue">R$ 0,00</b><small>em produtos</small></article>
+      </section>
+      <section class="daily-panel" id="ritmo" aria-labelledby="dailyTitle">
+        <div class="daily-head">
+          <div><p class="eyebrow">RITMO DO PRÉ-SAVE</p><h2 id="dailyTitle">Caixas pedidas por dia</h2><p>Pedidos cancelados não entram nesta conta.</p></div>
+          <label class="daily-range">Período<select id="dailyRange" aria-label="Período do gráfico de caixas por dia"><option value="7">Últimos 7 dias</option><option value="14">Últimos 14 dias</option><option value="30">Últimos 30 dias</option></select></label>
+        </div>
+        <div class="daily-summary">
+          <article><span>Hoje</span><b id="dailyToday">0</b><small>caixas</small></article>
+          <article><span>No período</span><b id="dailyTotal">0</b><small>caixas</small></article>
+          <article><span>Média diária</span><b id="dailyAverage">0</b><small>caixas por dia</small></article>
+          <article><span>Melhor dia</span><b id="dailyPeak">—</b><small id="dailyPeakValue">0 caixas</small></article>
+        </div>
+        <div class="daily-chart-scroll"><div class="daily-chart" id="dailyChart" role="img" aria-label="Gráfico de caixas pedidas por dia"></div></div>
       </section>
       <section class="demand-panel" id="modelos">
         <div class="demand-head">
