@@ -8,7 +8,7 @@ const SKUS=["TG30621","TG30615","TG30616","TG30617","TG30618","TG30619","TG30620
 let orders=[];
 let currentAdmin=null;
 let toastTimer;
-const asset=sku=>sku==="TG30621"?"../public/relogios/TG30621.png":`${ASSET_BASE}/${sku}.svg`;
+const asset=sku=>sku==="TG30621"?"../public/relogios/TG30621.webp":`${ASSET_BASE}/${sku}.svg`;
 
 function escapeHtml(value=""){return String(value).replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char])}
 function toast(message){clearTimeout(toastTimer);$("adminToast").textContent=message;$("adminToast").classList.add("show");toastTimer=setTimeout(()=>$("adminToast").classList.remove("show"),2600)}
