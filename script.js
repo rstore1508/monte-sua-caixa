@@ -7,7 +7,7 @@ let toastTimer;
 let imageBusy=false,orderImageBlob=null,orderImageUrl="";
 const $=id=>document.getElementById(id);
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-const asset=sku=>sku==="TG30621"?"public/relogios/TG30621.png":`${ASSET_BASE}/${encodeURIComponent(sku)}.svg`;
+const asset=sku=>`${ASSET_BASE}/${encodeURIComponent(sku)}.${sku==="TG30621"?"webp":"svg"}`;
 
 function load(){
   try{
