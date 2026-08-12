@@ -1,0 +1,9 @@
+﻿# Arquivos pesados servidos pelo Supabase Storage
+/public/*
+!/public/relogios/
+/public/relogios/*
+!/public/relogios/TG30621.webp
+
+# Arquivos locais do sistema
+.DS_Store
+Thumbs.db
