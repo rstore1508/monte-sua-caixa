@@ -4,11 +4,11 @@ const $=id=>document.getElementById(id);
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const dateTime=value=>new Date(value).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});
 const statusLabels={novo:"Novo",em_contato:"Em contato",confirmado:"Confirmado",cancelado:"Cancelado"};
-const SKUS=["TG30615","TG30616","TG30617","TG30618","TG30619","TG30620","TG30622","TG30623","TG30624","TG30625","TG30626","TG30627","TG30628","TG30629","TG30630","TG30631","TG30632","TG30633","TG30634","TG30635","TG30636","TG30637","TG30638","TG30639","TG30640","TG30641","TG30642","TG30643","TG30644","TG30645","TG30646","TG30647","TG30648","TG30649","TG30650","TG30651","TG30652","TG30653","TG30654"];
+const SKUS=["TG30621","TG30615","TG30616","TG30617","TG30618","TG30619","TG30620","TG30622","TG30623","TG30624","TG30625","TG30626","TG30627","TG30628","TG30629","TG30630","TG30631","TG30632","TG30633","TG30634","TG30635","TG30636","TG30637","TG30638","TG30639","TG30640","TG30641","TG30642","TG30643","TG30644","TG30645","TG30646","TG30647","TG30648","TG30649","TG30650","TG30651","TG30652","TG30653","TG30654"];
 let orders=[];
-let inventoryRows=[];
 let currentAdmin=null;
 let toastTimer;
+const asset=sku=>sku==="TG30621"?"../public/relogios/TG30621.png":`${ASSET_BASE}/${sku}.svg`;
 
 function escapeHtml(value=""){return String(value).replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[char])}
 function toast(message){clearTimeout(toastTimer);$("adminToast").textContent=message;$("adminToast").classList.add("show");toastTimer=setTimeout(()=>$("adminToast").classList.remove("show"),2600)}
@@ -73,9 +73,6 @@ async function loadOrders(manual=false){
   }
   $("loadingState").hidden=true;
   if(loadError){console.error(loadError);toast("Não foi possível carregar os pedidos.");return}
-  const {data:stockData,error:stockError}=await db.from("sku_inventory").select("sku,capacity,reserved,available").order("sku");
-  if(stockError){console.error(stockError);toast("Pedidos carregados, mas o saldo não pôde ser consultado.")}
-  inventoryRows=stockData||[];
   orders=loaded;
   updateMetrics();
   renderDailyBoxes();
@@ -133,7 +130,6 @@ function updateMetrics(){
 }
 
 function demandRows(){
-  const inventoryMap=new Map(inventoryRows.map(item=>[item.sku,item]));
   const stats=new Map(SKUS.map(sku=>[sku,{sku,units:0,stores:new Set()}]));
   orders.filter(order=>order.status!=="cancelado").forEach(order=>{
     const seen=new Set();
@@ -145,10 +141,7 @@ function demandRows(){
       if(!seen.has(sku)){stats.get(sku).stores.add(String(order.id));seen.add(sku)}
     });
   });
-  return [...stats.values()].map(item=>{
-    const stock=inventoryMap.get(item.sku);
-    return {...item,units:stock?Number(stock.reserved):item.units,stores:item.stores.size,capacity:stock?Number(stock.capacity):200,available:stock?Number(stock.available):Math.max(0,200-item.units)};
-  }).sort((a,b)=>b.units-a.units||b.stores-a.stores||a.sku.localeCompare(b.sku));
+  return [...stats.values()].map(item=>({...item,stores:item.stores.size,toTarget:Math.max(0,200-item.units)})).sort((a,b)=>b.units-a.units||b.stores-a.stores||a.sku.localeCompare(b.sku));
 }
 
 function renderDemand(){
@@ -159,30 +152,30 @@ function renderDemand(){
   const leader=rows[0];
   const launchUnits=rows.slice(0,launchSize).reduce((sum,item)=>sum+item.units,0);
   const share=total?Math.round(launchUnits/total*100):0;
-  const urgent=rows.filter(item=>item.available<=30);
+  const urgent=rows.filter(item=>item.units>=200);
   $("topSku").textContent=leader?.units?leader.sku:"—";
   $("topSkuUnits").textContent=leader?.units?`${leader.units} unidade${leader.units===1?"":"s"} em ${leader.stores} seleção${leader.stores===1?"":"ões"}`:"Sem escolhas ainda";
   $("activeSkus").textContent=active;
   $("launchUnits").textContent=`${launchUnits} un.`;
   $("launchShare").textContent=`${share}% da procura`;
   $("launchCallout").innerHTML=urgent.length
-    ?`<span class="callout-icon">!</span><div><b>${urgent.length} modelo${urgent.length===1?" atingiu":"s atingiram"} o alerta de últimas 30 unidades.</b><p>${urgent.map(item=>`${item.sku}: ${item.available} restantes`).join(" · ")}. O banco bloqueia automaticamente cada SKU ao chegar em 200.</p></div>`
+    ?`<span class="callout-icon">!</span><div><b>${urgent.length} modelo${urgent.length===1?" atingiu":"s atingiram"} 200 unidades.</b><p>${urgent.map(item=>`${item.sku}: ${item.units} pedidos`).join(" · ")}. A escolha continua liberada; desative manualmente quando decidirem.</p></div>`
     :total
-    ?`<span class="callout-icon">★</span><div><b>Comece pelos ${launchSize} primeiros modelos: eles concentram ${share}% da demanda.</b><p>Cada SKU está protegido pelo limite de 200 unidades.</p></div>`
+    ?`<span class="callout-icon">★</span><div><b>Comece pelos ${launchSize} primeiros modelos: eles concentram ${share}% da demanda.</b><p>A marca de 200 é apenas um alerta; não bloqueia novas escolhas.</p></div>`
     :`<span class="callout-icon">★</span><div><b>A recomendação aparecerá com os primeiros pré-pedidos.</b><p>Quanto mais seleções forem finalizadas, mais segura fica a ordem de fabricação.</p></div>`;
   const maxUnits=Math.max(1,...rows.map(item=>item.units));
   $("modelRanking").innerHTML=rows.map((item,index)=>{
     const first=item.units>0&&index<launchSize;
     const second=item.units>0&&index>=launchSize&&index<launchSize*2;
-    const wave=item.available===0?["wave-stock-out","Esgotado"]:item.available<=30?["wave-stock-low",`Restam ${item.available}`]:first?["wave-first","Produzir primeiro"]:second?["wave-second","Segunda onda"]:["wave-wait",item.units?"Aguardar":"Sem demanda"];
+    const wave=item.units>=200?["wave-stock-out","Meta 200 atingida"]:item.units>=170?["wave-stock-low",`${item.toTarget} para 200`]:first?["wave-first","Produzir primeiro"]:second?["wave-second","Segunda onda"]:["wave-wait",item.units?"Aguardar":"Sem demanda"];
     const percent=total?Math.round(item.units/total*100):0;
     return `<article class="model-row ${first?"is-launch":""}">
       <span class="model-rank">${index+1}º</span>
-      <img class="model-thumb" src="${ASSET_BASE}/${item.sku}.svg" alt="Relógio ${item.sku}" loading="lazy">
+      <img class="model-thumb" src="${asset(item.sku)}" alt="Relógio ${item.sku}" loading="lazy">
       <div class="model-id"><b>${escapeHtml(item.sku)}</b><small>${percent}% da procura total</small></div>
       <div class="demand-visual"><div class="demand-bar"><i style="width:${item.units/maxUnits*100}%"></i></div></div>
       <div class="model-stat"><b>${item.units} un.</b><small>pré-selecionadas</small></div>
-      <div class="model-stat stores-stat"><b>${item.available} restantes</b><small>limite ${item.capacity}</small></div>
+      <div class="model-stat stores-stat"><b>${item.toTarget} para 200</b><small>alerta manual</small></div>
       <span class="wave-badge ${wave[0]}">${wave[1]}</span>
     </article>`;
   }).join("");
