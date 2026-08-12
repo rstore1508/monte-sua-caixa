@@ -1,15 +1,13 @@
 const ASSET_BASE=window.TUGUINHO_ASSET_BASE||"public/relogios";
-const SKUS=["TG30615","TG30616","TG30617","TG30618","TG30619","TG30620","TG30622","TG30623","TG30624","TG30625","TG30626","TG30627","TG30628","TG30629","TG30630","TG30631","TG30632","TG30633","TG30634","TG30635","TG30636","TG30637","TG30638","TG30639","TG30640","TG30641","TG30642","TG30643","TG30644","TG30645","TG30646","TG30647","TG30648","TG30649","TG30650","TG30651","TG30652","TG30653","TG30654"];
+const SKUS=["TG30621","TG30615","TG30616","TG30617","TG30618","TG30619","TG30620","TG30622","TG30623","TG30624","TG30625","TG30626","TG30627","TG30628","TG30629","TG30630","TG30631","TG30632","TG30633","TG30634","TG30635","TG30636","TG30637","TG30638","TG30639","TG30640","TG30641","TG30642","TG30643","TG30644","TG30645","TG30646","TG30647","TG30648","TG30649","TG30650","TG30651","TG30652","TG30653","TG30654"];
 const PRICE=39.99,BOX_SIZE=12,STORAGE_KEY="tuguinho-monte-sua-caixa-v3";
 let state={current:[],boxes:[]};
-let inventory=new Map();
-let inventoryLoaded=false;
 let zoomLevel=1;
 let toastTimer;
 let imageBusy=false,orderImageBlob=null,orderImageUrl="";
 const $=id=>document.getElementById(id);
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-const asset=sku=>`${ASSET_BASE}/${encodeURIComponent(sku)}.svg`;
+const asset=sku=>sku==="TG30621"?"public/relogios/TG30621.png":`${ASSET_BASE}/${encodeURIComponent(sku)}.svg`;
 
 function load(){
   try{
@@ -19,24 +17,6 @@ function load(){
 }
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
 function productCount(sku){return state.current.filter(item=>item===sku).length}
-function selectionCount(sku){return state.current.filter(item=>item===sku).length+state.boxes.flat().filter(item=>item===sku).length}
-function stockInfo(sku){return inventory.get(sku)||null}
-function localAvailable(sku){const stock=stockInfo(sku);return stock?Math.max(0,stock.available-selectionCount(sku)):null}
-function stockLabel(sku){
-  const available=localAvailable(sku);
-  if(available===null)return "Consultando disponibilidade";
-  if(available===0)return "Esgotado no pré-lançamento";
-  if(available<=30)return `Últimas ${available} unidades`;
-  return `${available} disponíveis`;
-}
-async function loadAvailability(renderAfter=true){
-  if(!window.tuguinhoDb)return;
-  const {data,error}=await window.tuguinhoDb.from("sku_inventory").select("sku,capacity,reserved,available").order("sku");
-  if(error){console.error("Falha ao consultar disponibilidade",error);return}
-  inventory=new Map((data||[]).map(item=>[item.sku,{capacity:Number(item.capacity),reserved:Number(item.reserved),available:Number(item.available)}]));
-  inventoryLoaded=true;
-  if(renderAfter)render();
-}
 function toast(text){clearTimeout(toastTimer);$("toast").textContent=text;$("toast").classList.add("show");toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2500)}
 
 function renderProducts(filter=""){
@@ -44,14 +24,11 @@ function renderProducts(filter=""){
   $("visibleCount").textContent=list.length;
   $("productGrid").innerHTML=list.length?list.map(sku=>{
     const count=productCount(sku);
-    const available=localAvailable(sku),soldOut=available===0;
-    const stockClass=soldOut?"stock-out":available!==null&&available<=30?"stock-low":"";
-    return `<article class="product ${count?"selected":""} ${soldOut?"sold-out":""}" data-sku="${sku}">
+    return `<article class="product ${count?"selected":""}" data-sku="${sku}">
       ${count?`<span class="product-badge">${count} na caixa</span>`:""}
       <button class="product-photo zoom-trigger" type="button" aria-label="Ampliar relógio ${sku}"><img src="${asset(sku)}" alt="Relógio infantil ${sku}" loading="lazy"><span>⌕ VER DETALHES</span></button>
       <h3>${sku}</h3><b class="product-price">R$ 39,99</b>
-      <small class="stock-label ${stockClass}">${stockLabel(sku)}</small>
-      <div class="quantity"><button class="remove" ${count?"":"disabled"} aria-label="Remover ${sku}">−</button><b>${count}</b><button class="add" ${state.current.length>=BOX_SIZE||soldOut?"disabled":""} aria-label="Adicionar ${sku}"><span>${soldOut?"Esgotado":count?"Mais":"Adicionar"}</span><b>+</b></button></div>
+      <div class="quantity"><button class="remove" ${count?"":"disabled"} aria-label="Remover ${sku}">−</button><b>${count}</b><button class="add" ${state.current.length>=BOX_SIZE?"disabled":""} aria-label="Adicionar ${sku}"><span>${count?"Mais":"Adicionar"}</span><b>+</b></button></div>
     </article>`;
   }).join(""):`<div class="empty-result">Nenhum SKU encontrado.</div>`;
   document.querySelectorAll(".product").forEach(card=>{
@@ -72,7 +49,6 @@ function flyToBox(image){
 }
 function addProduct(sku,image){
   if(state.current.length>=BOX_SIZE)return toast("A caixinha já está completa.");
-  if(localAvailable(sku)===0)return toast(`${sku} esgotou no pré-lançamento.`);
   flyToBox(image);state.current.push(sku);save();render();
   if(state.current.length===BOX_SIZE)setTimeout(openCompleteModal,380);
   else if(productCount(sku)>1)toast("Pode repetir: esse modelo entrou novamente ✓");
@@ -129,18 +105,6 @@ function confirmCurrent(startAnother){
 }
 
 function countBox(box){return box.reduce((map,sku)=>(map[sku]=(map[sku]||0)+1,map),{})}
-function selectionShortages(){
-  const counts=state.boxes.flat().reduce((map,sku)=>(map[sku]=(map[sku]||0)+1,map),{});
-  return Object.entries(counts).flatMap(([sku,quantity])=>{
-    const stock=stockInfo(sku);
-    return stock&&quantity>stock.available?[{sku,quantity,available:stock.available}]:[];
-  });
-}
-function stockErrorDetails(error){
-  if(error?.shortages?.length)return error.shortages[0];
-  const match=String(error?.message||"").match(/ESTOQUE_INSUFICIENTE\|([^|]+)\|(\d+)/);
-  return match?{sku:match[1],available:Number(match[2])}:null;
-}
 function orderText(){return ["TUGUINHO — SELEÇÃO DO PRÉ-SAVE","",...state.boxes.flatMap((box,index)=>[`CAIXINHA ${index+1}`, ...Object.entries(countBox(box)).map(([sku,count])=>`${sku} — ${count} un.`),""]),`TOTAL: ${state.boxes.length} caixinha(s) — ${state.boxes.length*12} relógios — ${money(state.boxes.length*12*PRICE)}`].join("\n")}
 function renderPrintCard(){
   $("printDate").textContent=new Date().toLocaleDateString("pt-BR");
@@ -152,9 +116,6 @@ function renderPrintCard(){
 }
 async function saveAnonymousSelection(){
   if(!window.tuguinhoDb)throw new Error("Banco indisponível");
-  await loadAvailability(false);
-  const shortages=selectionShortages();
-  if(shortages.length){const error=new Error("Disponibilidade alterada");error.shortages=shortages;throw error}
   const {error}=await window.tuguinhoDb.from("orders").insert({store_name:null,buyer_name:null,representative:null,phone:null,boxes:state.boxes,unit_price:PRICE,consent_at:null});
   if(error)throw error;
 }
@@ -165,14 +126,6 @@ async function finalizeSelection(){
     location.href="pedido.html";
   }catch(error){
     console.error("Falha ao salvar seleção",error);
-    await loadAvailability();
-    const shortage=stockErrorDetails(error);
-    if(shortage){
-      alert(`${shortage.sku} possui apenas ${shortage.available} unidade${shortage.available===1?"":"s"} ${shortage.available===1?"disponível":"disponíveis"}. Exclua a caixinha que contém esse modelo e monte novamente com outro relógio.`);
-      toast("Um modelo atingiu o limite de 200 unidades.");
-      $("boxPanel").scrollIntoView({behavior:"smooth",block:"center"});
-      return;
-    }
     alert("Não foi possível registrar sua seleção agora. Confira sua internet e tente finalizar novamente.");
     toast("Pedido não registrado. Tente novamente.");
   }
@@ -263,5 +216,5 @@ $("newOrder").onclick=()=>{if(confirm("Começar uma nova seleção?")){state={cu
 window.addEventListener("scroll",()=>document.querySelector(".topbar")?.classList.toggle("scrolled",scrollY>24),{passive:true});
 document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(!$("completeModal").hidden)closeModal();if(!$("productZoom").hidden)closeProductZoom();if(!$("orderImageModal").hidden)closeOrderImage();closeMobileDrawer()}});
 
-load();render();loadAvailability();setupStory();setupRevealAnimations();
+load();render();setupStory();setupRevealAnimations();
 (function(){const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;const intro=$("brandIntro");const seen=sessionStorage.getItem("tuguinho-intro-seen");if(intro&&!reduced&&!seen){document.body.classList.add("intro-lock");sessionStorage.setItem("tuguinho-intro-seen","1");setTimeout(()=>{intro.classList.add("done");document.body.classList.remove("intro-lock")},1450)}else intro?.classList.add("done")})();

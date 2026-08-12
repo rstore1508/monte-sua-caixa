@@ -1,6 +1,6 @@
 const STORAGE_KEY="tuguinho-monte-sua-caixa-v3",PRICE=39.99;
 const ASSET_BASE=window.TUGUINHO_ASSET_BASE||"public/relogios";
-const asset=sku=>`${ASSET_BASE}/${encodeURIComponent(sku)}.svg`;
+const asset=sku=>sku==="TG30621"?"public/relogios/TG30621.png":`${ASSET_BASE}/${encodeURIComponent(sku)}.svg`;
 const money=value=>Number(value||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 function countBox(box){return box.reduce((map,sku)=>(map[sku]=(map[sku]||0)+1,map),{})}
 function loadOrder(){
